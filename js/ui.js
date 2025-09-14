@@ -171,81 +171,6 @@ const UI = {
             });
         }
         
-        // 页面背景色设置 - 修改为使用渐变背景
-        const pageBgColor = document.getElementById('pageBgColor');
-        if (pageBgColor) {
-            pageBgColor.addEventListener('input', function() {
-                const selectedColor = this.value;
-                // 获取当前角度设置
-                const angle = localStorage.getItem('gradientAngle') || '90';
-                // 生成渐变背景
-                const gradient = Utils.generateGradientFromColor(selectedColor, angle);
-                document.body.style.background = gradient;
-                localStorage.setItem('pageBgColor', selectedColor);
-                localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
-                
-                // 更新颜色预览
-                const pageBgColorPreview = document.getElementById('pageBgColorPreview');
-                if (pageBgColorPreview) {
-                    pageBgColorPreview.style.backgroundColor = selectedColor;
-                }
-                const pageBgColorValue = document.getElementById('pageBgColorValue');
-                if (pageBgColorValue) {
-                    pageBgColorValue.textContent = selectedColor;
-                }
-                
-                // 更新模态框背景色
-                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
-                    UI.updateModalBackgroundColor();
-                }
-            });
-        }
-        
-        // 渐变角度设置
-        const gradientAngle = document.getElementById('gradientAngle');
-        if (gradientAngle) {
-            gradientAngle.addEventListener('input', function() {
-                const angle = this.value;
-                const pageBgColor = document.getElementById('pageBgColor');
-                const selectedColor = pageBgColor ? pageBgColor.value : '#333333';
-                // 生成渐变背景
-                const gradient = Utils.generateGradientFromColor(selectedColor, angle);
-                document.body.style.background = gradient;
-                localStorage.setItem('gradientAngle', angle);
-                const gradientAngleValue = document.getElementById('gradientAngleValue');
-                if (gradientAngleValue) {
-                    gradientAngleValue.textContent = angle + '°';
-                }
-                localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
-                
-                // 更新模态框背景色
-                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
-                    UI.updateModalBackgroundColor();
-                }
-            });
-        }
-        
-        // 重置样式
-        const resetStyles = document.getElementById('resetStyles');
-        if (resetStyles) {
-            resetStyles.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (typeof Styles !== 'undefined' && typeof Styles.resetTitleStyles === 'function') {
-                    Styles.resetTitleStyles();
-                }
-            });
-        }
-        
-        // 页面设置模态框关闭事件
-        const closeButtons = document.querySelectorAll('.modal .close');
-        if (closeButtons.length > 0) {
-            closeButtons[0].addEventListener('click', () => {
-                if (typeof UI !== 'undefined' && typeof UI.closeModal === 'function') {
-                    UI.closeModal('settingsModal');
-                }
-            });
-        }
-        
         // UI幻化功能 - 图片上传处理
         const imageUpload = document.getElementById('imageUpload');
         const colorPalettePreview = document.getElementById('colorPalettePreview');
@@ -262,7 +187,7 @@ const UI = {
                     try {
                         // 显示加载状态
                         colorPalettePreview.style.display = 'block';
-                        colorPalette.innerHTML = '<div style="text-align:center;padding:20px;">正在分析图片颜色...</div>';
+                        colorPalette.innerHTML = '<div style="text-align:center;padding:5px;">正在分析图片颜色...</div>';
                         applyColorSchemeBtn.style.display = 'none';
                         
                         // 提取颜色
@@ -271,32 +196,35 @@ const UI = {
                         // 显示颜色调色板
                         colorPalette.innerHTML = '';
                         colorPalette.style.display = 'flex';
-                        colorPalette.style.flexWrap = 'wrap';
-                        colorPalette.style.justifyContent = 'center';
-                        colorPalette.style.gap = '10px';
-                        colorPalette.style.padding = '10px';
+                        colorPalette.style.flexWrap = 'nowrap';
+                        colorPalette.style.overflowX = 'auto';
+                        colorPalette.style.justifyContent = 'flex-start';
+                        colorPalette.style.gap = '5px';
+                        colorPalette.style.padding = '5px';
+                        colorPalette.style.alignItems = 'center';
                         
                         colors.forEach(color => {
                             const colorItem = document.createElement('div');
                             colorItem.className = 'color-item';
                             colorItem.style.cssText = `
-                                width: 40px;
-                                height: 40px;
+                                width: 30px;
+                                height: 30px;
                                 background-color: ${color.hex};
-                                border-radius: 6px;
+                                border-radius: 4px;
                                 cursor: pointer;
-                                border: 2px solid rgba(255, 255, 255, 0.5);
+                                border: 1px solid rgba(255, 255, 255, 0.5);
                                 transition: all 0.3s ease;
-                                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                                flex-shrink: 0;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
                             `;
                             colorItem.title = color.hex;
                             colorItem.addEventListener('click', function() {
                                 // 选中颜色时的反馈
                                 this.style.transform = 'scale(1.2)';
-                                this.style.boxShadow = '0 0 0 3px white, 0 0 10px rgba(255,255,255,0.8)';
+                                this.style.boxShadow = '0 0 0 2px white, 0 0 5px rgba(255,255,255,0.8)';
                                 setTimeout(() => {
                                     this.style.transform = 'scale(1)';
-                                    this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                                    this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)';
                                 }, 300);
                             });
                             colorPalette.appendChild(colorItem);
@@ -307,12 +235,13 @@ const UI = {
                         
                         // 显示应用按钮
                         applyColorSchemeBtn.style.display = 'block';
-                        applyColorSchemeBtn.style.marginTop = '15px';
-                        applyColorSchemeBtn.style.padding = '10px 20px';
+                        applyColorSchemeBtn.style.marginTop = '10px';
+                        applyColorSchemeBtn.style.padding = '8px 16px';
+                        applyColorSchemeBtn.style.width = '100%';
                         
                     } catch (error) {
                         console.error('图片处理错误:', error);
-                        colorPalette.innerHTML = '<div style="color:#ff6666;text-align:center;padding:20px;">颜色分析失败，请重试</div>';
+                        colorPalette.innerHTML = '<div style="color:#ff6666;text-align:center;padding:10px;">颜色分析失败，请重试</div>';
                         applyColorSchemeBtn.style.display = 'none';
                     }
                 };

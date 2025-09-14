@@ -251,45 +251,66 @@
     align-items: flex-start;
 }
 
-/* UI幻化样式 */
+/* UI幻化预览区域优化 */
 .ui-magic-preview {
-    padding: 10px;
+    padding: 8px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 10px;
 }
 
 .color-palette-container {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .palette-title {
     font-size: 14px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #fff;
 }
 
 .color-palette {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 5px;
+    overflow-x: auto;
+    padding: 5px 0;
+    scrollbar-width: thin;
+}
+
+.color-palette::-webkit-scrollbar {
+    height: 6px;
+}
+
+.color-palette::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.color-palette::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
 }
 
 .color-palette-item {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .color-palette-item:hover {
     transform: scale(1.1);
+    box-shadow: 0 0 0 2px white, 0 0 5px rgba(255,255,255,0.8);
 }
 
 .color-palette-item.active {
-    transform: scale(1.2);
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px white, 0 0 5px rgba(255,255,255,0.8);
 }
