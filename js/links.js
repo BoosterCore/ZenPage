@@ -1,158 +1,134 @@
 // 链接管理模块
 const Links = {
-    // 初始化链接功能
-    initLinkFunctions() {
-        // 链接编辑表单提交事件
-        document.getElementById('linkEditForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveLink();
-        });
-        
-        // 统一的模态框关闭事件处理
-        window.addEventListener('click', (event) => {
-            const settingsModal = document.getElementById('settingsModal');
-            const linkEditModal = document.getElementById('linkEditModal');
-            const sectionEditModal = document.getElementById('sectionEditModal');
-            
-            // 点击页面设置模态框外部关闭
-            if (event.target === settingsModal) {
-                UI.closeModal('settingsModal');
-            }
-            
-            // 点击链接编辑模态框外部关闭
-            if (event.target === linkEditModal) {
-                UI.closeModal('linkEditModal');
-            }
-            
-            // 点击分组编辑模态框外部关闭
-            if (event.target === sectionEditModal) {
-                UI.closeModal('sectionEditModal');
-            }
-        });
-        
-        // 模态框关闭事件
-        const closeButtons = document.querySelectorAll('.modal .close');
-        closeButtons.forEach((button, index) => {
-            if (index === 0) { // 页面设置模态框关闭按钮
-                button.addEventListener('click', () => {
-                    UI.closeModal('settingsModal');
-                });
-            } else if (index === 1) { // 链接编辑模态框关闭按钮
-                button.addEventListener('click', () => {
-                    UI.closeModal('linkEditModal');
-                });
-            } else if (index === 2) { // 分组编辑模态框关闭按钮
-                button.addEventListener('click', () => {
-                    UI.closeModal('sectionEditModal');
-                });
-            }
-        });
-    },
-    
     // 绑定编辑和删除事件
     bindEditDeleteEvents() {
-        // 编辑链接按钮事件
+        // 为每个编辑链接按钮绑定事件
         document.querySelectorAll('.edit-link-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
+            button.addEventListener('click', function(e) {
                 e.stopPropagation();
-                const linkItem = e.target.closest('.link-item');
-                const linkId = linkItem.dataset.linkId;
+                const linkItem = this.closest('.link-item');
+                const sectionElement = this.closest('.links-section');
+                const sectionId = sectionElement.dataset.sectionId;
                 
-                // 找到对应的链接数据（需要在所有分组中查找）
-                let linkData = null;
-                let sectionId = null;
-                
-                for (const section of sectionsData) {
-                    const link = section.links.find(l => l.id === linkId);
-                    if (link) {
-                        linkData = link;
-                        sectionId = section.id;
-                        break;
+                // 查找对应的链接数据
+                const section = window.sectionsData.find(s => s.id === sectionId);
+                if (section) {
+                    // 获取链接索引
+                    const linkItems = Array.from(sectionElement.querySelectorAll('.link-item:not(:has(.add-link-placeholder))'));
+                    const linkIndex = linkItems.indexOf(linkItem);
+                    if (linkIndex >= 0 && linkIndex < section.links.length) {
+                        const linkData = section.links[linkIndex];
+                        const linkId = `${sectionId}-${linkIndex}`;
+                        if (typeof UI !== 'undefined' && typeof UI.showLinkEditModal === 'function') {
+                            UI.showLinkEditModal(linkData, linkId);
+                        }
                     }
-                }
-                
-                if (linkData && sectionId) {
-                    UI.showLinkEditModal(linkData, linkId);
-                    document.getElementById('linkEditModal').dataset.currentSectionId = sectionId;
                 }
             });
         });
         
-        // 删除链接按钮事件
+        // 为每个删除链接按钮绑定事件
         document.querySelectorAll('.delete-link-btn').forEach(button => {
-            // 移除之前可能存在的事件监听器
-            const clone = button.cloneNode(true);
-            button.parentNode.replaceChild(clone, button);
-            
-            // 添加新的事件监听器
-            clone.addEventListener('click', (e) => {
+            button.addEventListener('click', function(e) {
                 e.stopPropagation();
-                const linkItem = e.target.closest('.link-item');
-                const linkId = linkItem.dataset.linkId;
                 
-                if (confirm('确定要删除这个链接吗？')) {
-                    // 从数据数组中删除（需要在所有分组中查找）
-                    let sectionId = null;
-                    for (const section of sectionsData) {
-                        const linkIndex = section.links.findIndex(link => link.id === linkId);
-                        if (linkIndex !== -1) {
-                            section.links.splice(linkIndex, 1);
-                            sectionId = section.id;
-                            break;
+                const linkItem = this.closest('.link-item');
+                const sectionElement = this.closest('.links-section');
+                const sectionId = sectionElement.dataset.sectionId;
+                
+                // 使用自定义确认对话框
+                if (typeof UI !== 'undefined' && typeof UI.showConfirmModal === 'function') {
+                    UI.showConfirmModal('确定要删除这个链接吗？', function() {
+                        // 用户点击确定
+                        const section = window.sectionsData.find(s => s.id === sectionId);
+                        if (section) {
+                            // 获取链接索引
+                            const linkItems = Array.from(sectionElement.querySelectorAll('.link-item:not(:has(.add-link-placeholder))'));
+                            const linkIndex = linkItems.indexOf(linkItem);
+                            if (linkIndex >= 0 && linkIndex < section.links.length) {
+                                section.links.splice(linkIndex, 1);
+                                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                                if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                                    Renderer.renderSections();
+                                }
+                            }
                         }
-                    }
-                    
-                    if (sectionId) {
-                        Data.saveSectionsData();
-                        Renderer.updateSection(sectionId);
-                    }
+                    }, function() {
+                        // 用户点击取消，不做任何操作
+                        return;
+                    });
+                }
+            });
+        });
+        
+        // 为每个分组标题绑定事件
+        document.querySelectorAll('.section-title[contenteditable]').forEach(title => {
+            title.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+            
+            title.addEventListener('blur', function() {
+                const sectionElement = this.closest('.links-section');
+                const sectionId = sectionElement.dataset.sectionId;
+                const newTitle = this.textContent;
+                
+                // 更新分组标题
+                const section = window.sectionsData.find(s => s.id === sectionId);
+                if (section) {
+                    section.title = newTitle;
+                    localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
                 }
             });
         });
     },
     
-    // 保存链接
-    saveLink() {
+    // 处理链接编辑表单提交
+    handleLinkEditSubmit(e) {
+        e.preventDefault();
+        
         const modal = document.getElementById('linkEditModal');
-        const url = document.getElementById('editLinkUrl').value;
-        const name = document.getElementById('editLinkName').value;
-        const icon = document.getElementById('editLinkIcon').value;
+        const urlInput = document.getElementById('editLinkUrl');
+        const nameInput = document.getElementById('editLinkName');
+        const iconInput = document.getElementById('editLinkIcon');
         
-        // 获取当前分组ID
-        const sectionId = modal.dataset.currentSectionId || 'default';
+        const isEditMode = modal.dataset.editMode === 'edit';
+        const linkId = modal.dataset.linkId;
+        const sectionId = modal.dataset.currentSectionId;
         
-        // 找到对应的分组
-        const sectionIndex = sectionsData.findIndex(section => section.id === sectionId);
-        if (sectionIndex === -1) return;
-        
-        const sectionLinks = sectionsData[sectionIndex].links;
-        
-        if (modal.dataset.editMode === 'add') {
-            // 添加新链接
-            const newLink = {
-                id: 'link' + Date.now(),
-                url: url,
-                name: name,
-                icon: icon
-            };
-            
-            sectionLinks.push(newLink);
-        } else {
+        if (isEditMode && linkId) {
             // 编辑现有链接
-            const linkId = modal.dataset.linkId;
-            const linkIndex = sectionLinks.findIndex(link => link.id === linkId);
-            
-            if (linkIndex !== -1) {
-                sectionLinks[linkIndex].url = url;
-                sectionLinks[linkIndex].name = name;
-                sectionLinks[linkIndex].icon = icon;
+            const [secId, linkIndex] = linkId.split('-');
+            const section = window.sectionsData.find(s => s.id === secId);
+            if (section) {
+                section.links[parseInt(linkIndex)] = {
+                    url: urlInput.value,
+                    name: nameInput.value,
+                    icon: iconInput.value
+                };
+                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+            }
+        } else if (sectionId) {
+            // 添加新链接
+            const section = window.sectionsData.find(s => s.id === sectionId);
+            if (section) {
+                section.links = section.links || [];
+                section.links.push({
+                    url: urlInput.value,
+                    name: nameInput.value,
+                    icon: iconInput.value
+                });
+                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
             }
         }
         
-        // 保存数据并局部更新
-        Data.saveSectionsData();
-        Renderer.updateSection(sectionId);
-        
-        UI.closeModal('linkEditModal');
+        if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+            Renderer.renderSections();
+        }
+        if (typeof UI !== 'undefined' && typeof UI.closeModal === 'function') {
+            UI.closeModal('linkEditModal');
+        }
     }
 };

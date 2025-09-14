@@ -96,95 +96,258 @@ const UI = {
     // 初始化设置面板事件
     initSettingsPanel() {
         // 页面标题设置
-        document.getElementById('pageTitleInput').addEventListener('input', function() {
-            document.getElementById('pageTitle').innerText = this.value;
-            localStorage.setItem('pageTitle', this.value);
-        });
+        const pageTitleInput = document.getElementById('pageTitleInput');
+        if (pageTitleInput) {
+            pageTitleInput.addEventListener('input', function() {
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    pageTitle.innerText = this.value;
+                    localStorage.setItem('pageTitle', this.value);
+                }
+            });
+        }
         
         // 点击页面标题时显示设置面板（只在编辑模式下）
-        document.getElementById('pageTitle').addEventListener('click', (e) => {
-            if (isEditMode) {
-                document.getElementById('settingsModal').style.display = 'block';
-                this.showBodyBlur();
+        document.addEventListener('click', (e) => {
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle && e.target === pageTitle) {
+                if (window.isEditMode) {
+                    const settingsModal = document.getElementById('settingsModal');
+                    if (settingsModal && typeof UI !== 'undefined' && typeof UI.showBodyBlur === 'function') {
+                        settingsModal.style.display = 'block';
+                        UI.showBodyBlur();
+                    }
+                }
             }
         });
         
         // 字体设置
-        document.getElementById('fontFamily').addEventListener('change', function() {
-            document.getElementById('pageTitle').style.fontFamily = this.value;
-            localStorage.setItem('titleFontFamily', this.value);
-        });
+        const fontFamily = document.getElementById('fontFamily');
+        if (fontFamily) {
+            fontFamily.addEventListener('change', function() {
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    pageTitle.style.fontFamily = this.value;
+                    localStorage.setItem('titleFontFamily', this.value);
+                }
+            });
+        }
         
         // 字号设置
-        document.getElementById('fontSize').addEventListener('input', function() {
-            const size = this.value + 'px';
-            document.getElementById('pageTitle').style.fontSize = size;
-            document.getElementById('fontSizeValue').textContent = size;
-            localStorage.setItem('titleFontSize', this.value);
-        });
+        const fontSize = document.getElementById('fontSize');
+        if (fontSize) {
+            fontSize.addEventListener('input', function() {
+                const size = this.value + 'px';
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    pageTitle.style.fontSize = size;
+                }
+                const fontSizeValue = document.getElementById('fontSizeValue');
+                if (fontSizeValue) {
+                    fontSizeValue.textContent = size;
+                }
+                localStorage.setItem('titleFontSize', this.value);
+            });
+        }
         
         // 字体颜色设置
-        document.getElementById('fontColor').addEventListener('input', function() {
-            document.getElementById('pageTitle').style.color = this.value;
-            localStorage.setItem('titleFontColor', this.value);
-            // 更新颜色预览
-            document.getElementById('fontColorPreview').style.backgroundColor = this.value;
-            document.getElementById('fontColorValue').textContent = this.value;
-        });
+        const fontColor = document.getElementById('fontColor');
+        if (fontColor) {
+            fontColor.addEventListener('input', function() {
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    pageTitle.style.color = this.value;
+                }
+                localStorage.setItem('titleFontColor', this.value);
+                // 更新颜色预览
+                const fontColorPreview = document.getElementById('fontColorPreview');
+                if (fontColorPreview) {
+                    fontColorPreview.style.backgroundColor = this.value;
+                }
+                const fontColorValue = document.getElementById('fontColorValue');
+                if (fontColorValue) {
+                    fontColorValue.textContent = this.value;
+                }
+            });
+        }
         
         // 页面背景色设置 - 修改为使用渐变背景
-        document.getElementById('pageBgColor').addEventListener('input', function() {
-            const selectedColor = this.value;
-            // 获取当前角度设置
-            const angle = localStorage.getItem('gradientAngle') || '90';
-            // 生成渐变背景
-            const gradient = Utils.generateGradientFromColor(selectedColor, angle);
-            document.body.style.background = gradient;
-            localStorage.setItem('pageBgColor', selectedColor);
-            localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
-            
-            // 更新颜色预览
-            document.getElementById('pageBgColorPreview').style.backgroundColor = selectedColor;
-            document.getElementById('pageBgColorValue').textContent = selectedColor;
-            
-            // 更新模态框背景色
-            UI.updateModalBackgroundColor();
-        });
+        const pageBgColor = document.getElementById('pageBgColor');
+        if (pageBgColor) {
+            pageBgColor.addEventListener('input', function() {
+                const selectedColor = this.value;
+                // 获取当前角度设置
+                const angle = localStorage.getItem('gradientAngle') || '90';
+                // 生成渐变背景
+                const gradient = Utils.generateGradientFromColor(selectedColor, angle);
+                document.body.style.background = gradient;
+                localStorage.setItem('pageBgColor', selectedColor);
+                localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
+                
+                // 更新颜色预览
+                const pageBgColorPreview = document.getElementById('pageBgColorPreview');
+                if (pageBgColorPreview) {
+                    pageBgColorPreview.style.backgroundColor = selectedColor;
+                }
+                const pageBgColorValue = document.getElementById('pageBgColorValue');
+                if (pageBgColorValue) {
+                    pageBgColorValue.textContent = selectedColor;
+                }
+                
+                // 更新模态框背景色
+                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+                    UI.updateModalBackgroundColor();
+                }
+            });
+        }
         
         // 渐变角度设置
-        document.getElementById('gradientAngle').addEventListener('input', function() {
-            const angle = this.value;
-            const selectedColor = document.getElementById('pageBgColor').value;
-            // 生成渐变背景
-            const gradient = Utils.generateGradientFromColor(selectedColor, angle);
-            document.body.style.background = gradient;
-            localStorage.setItem('gradientAngle', angle);
-            document.getElementById('gradientAngleValue').textContent = angle + '°';
-            localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
-            
-            // 更新模态框背景色
-            UI.updateModalBackgroundColor();
-        });
+        const gradientAngle = document.getElementById('gradientAngle');
+        if (gradientAngle) {
+            gradientAngle.addEventListener('input', function() {
+                const angle = this.value;
+                const pageBgColor = document.getElementById('pageBgColor');
+                const selectedColor = pageBgColor ? pageBgColor.value : '#333333';
+                // 生成渐变背景
+                const gradient = Utils.generateGradientFromColor(selectedColor, angle);
+                document.body.style.background = gradient;
+                localStorage.setItem('gradientAngle', angle);
+                const gradientAngleValue = document.getElementById('gradientAngleValue');
+                if (gradientAngleValue) {
+                    gradientAngleValue.textContent = angle + '°';
+                }
+                localStorage.setItem('pageBgGradient', gradient); // 保存渐变色
+                
+                // 更新模态框背景色
+                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+                    UI.updateModalBackgroundColor();
+                }
+            });
+        }
         
         // 重置样式
-        document.getElementById('resetStyles').addEventListener('click', (e) => {
-            e.stopPropagation();
-            Styles.resetTitleStyles();
-        });
+        const resetStyles = document.getElementById('resetStyles');
+        if (resetStyles) {
+            resetStyles.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (typeof Styles !== 'undefined' && typeof Styles.resetTitleStyles === 'function') {
+                    Styles.resetTitleStyles();
+                }
+            });
+        }
         
         // 页面设置模态框关闭事件
         const closeButtons = document.querySelectorAll('.modal .close');
         if (closeButtons.length > 0) {
             closeButtons[0].addEventListener('click', () => {
-                this.closeModal('settingsModal');
+                if (typeof UI !== 'undefined' && typeof UI.closeModal === 'function') {
+                    UI.closeModal('settingsModal');
+                }
+            });
+        }
+        
+        // UI幻化功能 - 图片上传处理
+        const imageUpload = document.getElementById('imageUpload');
+        const colorPalettePreview = document.getElementById('colorPalettePreview');
+        const colorPalette = document.getElementById('colorPalette');
+        const applyColorSchemeBtn = document.getElementById('applyColorScheme');
+
+        if (imageUpload && colorPalettePreview && colorPalette && applyColorSchemeBtn) {
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        // 显示加载状态
+                        colorPalettePreview.style.display = 'block';
+                        colorPalette.innerHTML = '<div style="text-align:center;padding:20px;">正在分析图片颜色...</div>';
+                        applyColorSchemeBtn.style.display = 'none';
+                        
+                        // 提取颜色
+                        const colors = await UIMagic.extractColorsFromImage(e.target.result);
+                        
+                        // 显示颜色调色板
+                        colorPalette.innerHTML = '';
+                        colorPalette.style.display = 'flex';
+                        colorPalette.style.flexWrap = 'wrap';
+                        colorPalette.style.justifyContent = 'center';
+                        colorPalette.style.gap = '10px';
+                        colorPalette.style.padding = '10px';
+                        
+                        colors.forEach(color => {
+                            const colorItem = document.createElement('div');
+                            colorItem.className = 'color-item';
+                            colorItem.style.cssText = `
+                                width: 40px;
+                                height: 40px;
+                                background-color: ${color.hex};
+                                border-radius: 6px;
+                                cursor: pointer;
+                                border: 2px solid rgba(255, 255, 255, 0.5);
+                                transition: all 0.3s ease;
+                                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                            `;
+                            colorItem.title = color.hex;
+                            colorItem.addEventListener('click', function() {
+                                // 选中颜色时的反馈
+                                this.style.transform = 'scale(1.2)';
+                                this.style.boxShadow = '0 0 0 3px white, 0 0 10px rgba(255,255,255,0.8)';
+                                setTimeout(() => {
+                                    this.style.transform = 'scale(1)';
+                                    this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+                                }, 300);
+                            });
+                            colorPalette.appendChild(colorItem);
+                        });
+                        
+                        // 保存提取的颜色以供应用
+                        imageUpload.extractedColors = colors;
+                        
+                        // 显示应用按钮
+                        applyColorSchemeBtn.style.display = 'block';
+                        applyColorSchemeBtn.style.marginTop = '15px';
+                        applyColorSchemeBtn.style.padding = '10px 20px';
+                        
+                    } catch (error) {
+                        console.error('图片处理错误:', error);
+                        colorPalette.innerHTML = '<div style="color:#ff6666;text-align:center;padding:20px;">颜色分析失败，请重试</div>';
+                        applyColorSchemeBtn.style.display = 'none';
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            // 应用配色方案按钮
+            applyColorSchemeBtn.addEventListener('click', function() {
+                if (imageUpload.extractedColors && imageUpload.extractedColors.length > 0) {
+                    const colorScheme = UIMagic.generateColorScheme(imageUpload.extractedColors);
+                    UIMagic.applyColorScheme(colorScheme);
+                    
+                    // 显示成功消息
+                    const originalText = this.textContent;
+                    this.textContent = '配色已应用！';
+                    this.style.background = 'rgba(100, 200, 100, 0.7)';
+                    
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.background = '';
+                    }, 2000);
+                }
             });
         }
         
         // 初始隐藏设置面板
-        document.getElementById('settingsModal').style.display = 'none';
+        const settingsModal = document.getElementById('settingsModal');
+        if (settingsModal) {
+            settingsModal.style.display = 'none';
+        }
         
         // 初始更新模态框背景色
-        this.updateModalBackgroundColor();
+        if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+            UI.updateModalBackgroundColor();
+        }
     },
     
     // 初始化编辑模式切换
@@ -192,145 +355,201 @@ const UI = {
         const toggleBtn = document.getElementById('editModeToggle');
         
         // 设置初始按钮文本
-        toggleBtn.textContent = '✏️ 编辑模式';
+        if (toggleBtn) {
+            toggleBtn.textContent = '编辑模式';
+        }
         
-        toggleBtn.addEventListener('click', () => {
-            isEditMode = !isEditMode;
-            
-            if (isEditMode) {
-                // 进入编辑模式
-                toggleBtn.textContent = '✏️ 退出编辑';
-                toggleBtn.classList.add('edit-mode');
-            } else {
-                // 退出编辑模式
-                toggleBtn.textContent = '✏️ 编辑模式';
-                toggleBtn.classList.remove('edit-mode');
-            }
-            
-            // 重新渲染所有分组以更新编辑模式UI
-            Renderer.renderSections();
-        });
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                window.isEditMode = !window.isEditMode;
+                
+                if (window.isEditMode) {
+                    // 进入编辑模式
+                    toggleBtn.textContent = '退出编辑';
+                    toggleBtn.classList.add('edit-mode');
+                    // 显示编辑按钮
+                    const addSectionBtn = document.getElementById('addSectionBtn');
+                    const importConfigBtn = document.getElementById('importConfigBtn');
+                    const exportConfigBtn = document.getElementById('exportConfigBtn');
+                    
+                    if (addSectionBtn) addSectionBtn.style.display = 'inline-block';
+                    if (importConfigBtn) importConfigBtn.style.display = 'inline-block';
+                    if (exportConfigBtn) exportConfigBtn.style.display = 'inline-block';
+                    
+                    const headerControls = document.querySelector('.header-controls');
+                    if (headerControls) headerControls.classList.add('editing');
+                    
+                    // 重新渲染分组以显示编辑UI
+                    if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                        Renderer.renderSections();
+                    }
+                } else {
+                    // 退出编辑模式
+                    toggleBtn.textContent = '编辑模式';
+                    toggleBtn.classList.remove('edit-mode');
+                    // 隐藏编辑按钮
+                    const addSectionBtn = document.getElementById('addSectionBtn');
+                    const importConfigBtn = document.getElementById('importConfigBtn');
+                    const exportConfigBtn = document.getElementById('exportConfigBtn');
+                    
+                    if (addSectionBtn) addSectionBtn.style.display = 'none';
+                    if (importConfigBtn) importConfigBtn.style.display = 'none';
+                    if (exportConfigBtn) exportConfigBtn.style.display = 'none';
+                    
+                    const headerControls = document.querySelector('.header-controls');
+                    if (headerControls) headerControls.classList.remove('editing');
+                    
+                    // 重新渲染分组以隐藏编辑UI
+                    if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                        Renderer.renderSections();
+                    }
+                }
+            });
+        }
     },
     
     // 初始化导入/导出功能
     initImportExportFunctions() {
         // 导出配置功能
-        document.getElementById('exportConfigBtn').addEventListener('click', () => {
-            // 获取当前的所有配置数据
-            const configData = {
-                pageTitle: document.getElementById('pageTitle').innerText,
-                titleFontFamily: document.getElementById('pageTitle').style.fontFamily || 'Arial, sans-serif',
-                titleFontSize: document.getElementById('pageTitle').style.fontSize || '56px',
-                titleFontColor: document.getElementById('pageTitle').style.color || '#ffffff',
-                pageBgColor: document.body.style.backgroundColor || '#333333',
-                pageBgGradient: document.body.style.background || localStorage.getItem('pageBgGradient'),
-                gradientAngle: localStorage.getItem('gradientAngle') || '90',
-                sectionsData: sectionsData
-            };
-            
-            // 创建下载链接
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "navigation_config.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        });
+        const exportConfigBtn = document.getElementById('exportConfigBtn');
+        if (exportConfigBtn) {
+            exportConfigBtn.addEventListener('click', () => {
+                // 获取当前的所有配置数据
+                const configData = {
+                    pageTitle: document.getElementById('pageTitle').innerText,
+                    titleFontFamily: document.getElementById('pageTitle').style.fontFamily || 'Arial, sans-serif',
+                    titleFontSize: document.getElementById('pageTitle').style.fontSize || '56px',
+                    titleFontColor: document.getElementById('pageTitle').style.color || '#ffffff',
+                    pageBgColor: document.body.style.backgroundColor || '#333333',
+                    pageBgGradient: document.body.style.background || localStorage.getItem('pageBgGradient'),
+                    gradientAngle: localStorage.getItem('gradientAngle') || '90',
+                    sectionsData: typeof window.sectionsData !== 'undefined' ? window.sectionsData : []
+                };
+                
+                // 创建下载链接
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "navigation_config.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            });
+        }
 
         // 导入配置功能
-        document.getElementById('importConfigBtn').addEventListener('click', () => {
-            document.getElementById('importConfigInput').click();
-        });
+        const importConfigBtn = document.getElementById('importConfigBtn');
+        const importConfigInput = document.getElementById('importConfigInput');
+        if (importConfigBtn && importConfigInput) {
+            importConfigBtn.addEventListener('click', () => {
+                importConfigInput.click();
+            });
 
-        document.getElementById('importConfigInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const configData = JSON.parse(e.target.result);
-                    
-                    // 确认是否要导入配置
-                    if (!confirm('导入配置将覆盖当前所有设置，确定要继续吗？')) {
-                        document.getElementById('importConfigInput').value = '';
-                        return;
+            importConfigInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const configData = JSON.parse(e.target.result);
+                        
+                        // 确认是否要导入配置
+                        if (!confirm('导入配置将覆盖当前所有设置，确定要继续吗？')) {
+                            importConfigInput.value = '';
+                            return;
+                        }
+                        
+                        // 恢复配置数据
+                        const pageTitle = document.getElementById('pageTitle');
+                        const pageTitleInput = document.getElementById('pageTitleInput');
+                        if (configData.pageTitle && pageTitle && pageTitleInput) {
+                            pageTitle.innerText = configData.pageTitle;
+                            pageTitleInput.value = configData.pageTitle;
+                            localStorage.setItem('pageTitle', configData.pageTitle);
+                        }
+                        
+                        const fontFamily = document.getElementById('fontFamily');
+                        if (configData.titleFontFamily && pageTitle && fontFamily) {
+                            pageTitle.style.fontFamily = configData.titleFontFamily;
+                            fontFamily.value = configData.titleFontFamily;
+                            localStorage.setItem('titleFontFamily', configData.titleFontFamily);
+                        }
+                        
+                        const fontSize = document.getElementById('fontSize');
+                        const fontSizeValue = document.getElementById('fontSizeValue');
+                        if (configData.titleFontSize && pageTitle && fontSize && fontSizeValue) {
+                            pageTitle.style.fontSize = configData.titleFontSize;
+                            const fontSizeNum = configData.titleFontSize.replace('px', '');
+                            fontSize.value = fontSizeNum;
+                            fontSizeValue.textContent = configData.titleFontSize;
+                            localStorage.setItem('titleFontSize', fontSizeNum);
+                        }
+                        
+                        const fontColor = document.getElementById('fontColor');
+                        const fontColorPreview = document.getElementById('fontColorPreview');
+                        const fontColorValue = document.getElementById('fontColorValue');
+                        if (configData.titleFontColor && pageTitle && fontColor && fontColorPreview && fontColorValue) {
+                            pageTitle.style.color = configData.titleFontColor;
+                            const formattedFontColor = typeof Styles !== 'undefined' && typeof Styles.formatColorValue === 'function' 
+                                ? Styles.formatColorValue(configData.titleFontColor) 
+                                : configData.titleFontColor;
+                            fontColor.value = formattedFontColor;
+                            fontColorPreview.style.backgroundColor = formattedFontColor;
+                            fontColorValue.textContent = formattedFontColor;
+                            localStorage.setItem('titleFontColor', configData.titleFontColor);
+                        }
+                        
+                        // 加载渐变角度
+                        const gradientAngle = document.getElementById('gradientAngle');
+                        const gradientAngleValue = document.getElementById('gradientAngleValue');
+                        if (configData.gradientAngle && gradientAngle && gradientAngleValue) {
+                            gradientAngle.value = configData.gradientAngle;
+                            gradientAngleValue.textContent = configData.gradientAngle + '°';
+                            localStorage.setItem('gradientAngle', configData.gradientAngle);
+                        }
+                        
+                        // 应用渐变背景
+                        if (configData.pageBgGradient) {
+                            document.body.style.background = configData.pageBgGradient;
+                            localStorage.setItem('pageBgGradient', configData.pageBgGradient);
+                            localStorage.setItem('pageBgColor', configData.pageBgColor || '#333333');
+                        } else if (configData.pageBgColor) {
+                            // 如果没有渐变背景但有颜色，则生成渐变
+                            const angle = configData.gradientAngle || '90';
+                            const gradient = Utils.generateGradientFromColor(configData.pageBgColor, angle);
+                            document.body.style.background = gradient;
+                            localStorage.setItem('pageBgColor', configData.pageBgColor);
+                            localStorage.setItem('pageBgGradient', gradient);
+                            localStorage.setItem('gradientAngle', angle);
+                        }
+                        
+                        if (configData.sectionsData && typeof window.sectionsData !== 'undefined') {
+                            window.sectionsData = configData.sectionsData;
+                            // 保存数据
+                            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                            // 重新渲染
+                            if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                                Renderer.renderSections();
+                            }
+                        }
+                        
+                        // 更新模态框背景色
+                        UI.updateModalBackgroundColor();
+                        
+                        // 重置文件输入
+                        importConfigInput.value = '';
+                        
+                        alert('配置导入成功！');
+                    } catch (error) {
+                        console.error('导入配置时出错:', error);
+                        alert('配置文件格式错误，请选择有效的配置文件。');
+                        importConfigInput.value = '';
                     }
-                    
-                    // 恢复配置数据
-                    if (configData.pageTitle) {
-                        document.getElementById('pageTitle').innerText = configData.pageTitle;
-                        document.getElementById('pageTitleInput').value = configData.pageTitle;
-                        localStorage.setItem('pageTitle', configData.pageTitle);
-                    }
-                    
-                    if (configData.titleFontFamily) {
-                        document.getElementById('pageTitle').style.fontFamily = configData.titleFontFamily;
-                        document.getElementById('fontFamily').value = configData.titleFontFamily;
-                        localStorage.setItem('titleFontFamily', configData.titleFontFamily);
-                    }
-                    
-                    if (configData.titleFontSize) {
-                        document.getElementById('pageTitle').style.fontSize = configData.titleFontSize;
-                        const fontSizeValue = configData.titleFontSize.replace('px', '');
-                        document.getElementById('fontSize').value = fontSizeValue;
-                        document.getElementById('fontSizeValue').textContent = configData.titleFontSize;
-                        localStorage.setItem('titleFontSize', fontSizeValue);
-                    }
-                    
-                    if (configData.titleFontColor) {
-                        document.getElementById('pageTitle').style.color = configData.titleFontColor;
-                        const formattedFontColor = Styles.formatColorValue(configData.titleFontColor);
-                        document.getElementById('fontColor').value = formattedFontColor;
-                        document.getElementById('fontColorPreview').style.backgroundColor = formattedFontColor;
-                        document.getElementById('fontColorValue').textContent = formattedFontColor;
-                        localStorage.setItem('titleFontColor', configData.titleFontColor);
-                    }
-                    
-                    // 加载渐变角度
-                    if (configData.gradientAngle) {
-                        document.getElementById('gradientAngle').value = configData.gradientAngle;
-                        document.getElementById('gradientAngleValue').textContent = configData.gradientAngle + '°';
-                        localStorage.setItem('gradientAngle', configData.gradientAngle);
-                    }
-                    
-                    // 应用渐变背景
-                    if (configData.pageBgGradient) {
-                        document.body.style.background = configData.pageBgGradient;
-                        localStorage.setItem('pageBgGradient', configData.pageBgGradient);
-                        localStorage.setItem('pageBgColor', configData.pageBgColor || '#333333');
-                    } else if (configData.pageBgColor) {
-                        // 如果没有渐变背景但有颜色，则生成渐变
-                        const angle = configData.gradientAngle || '90';
-                        const gradient = Utils.generateGradientFromColor(configData.pageBgColor, angle);
-                        document.body.style.background = gradient;
-                        localStorage.setItem('pageBgColor', configData.pageBgColor);
-                        localStorage.setItem('pageBgGradient', gradient);
-                        localStorage.setItem('gradientAngle', angle);
-                    }
-                    
-                    if (configData.sectionsData) {
-                        sectionsData = configData.sectionsData;
-                        Data.saveSectionsData();
-                        Renderer.renderSections();
-                    }
-                    
-                    // 更新模态框背景色
-                    UI.updateModalBackgroundColor();
-                    
-                    // 重置文件输入
-                    document.getElementById('importConfigInput').value = '';
-                    
-                    alert('配置导入成功！');
-                } catch (error) {
-                    console.error('导入配置时出错:', error);
-                    alert('配置文件格式错误，请选择有效的配置文件。');
-                    document.getElementById('importConfigInput').value = '';
-                }
-            };
-            reader.readAsText(file);
-        });
+                };
+                reader.readAsText(file);
+            });
+        }
     },
     
     // 添加编辑覆盖层
@@ -357,7 +576,9 @@ const UI = {
         
         // 重新绑定事件
         setTimeout(() => {
-            Links.bindEditDeleteEvents();
+            if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                Links.bindEditDeleteEvents();
+            }
         }, 10);
     },
     
@@ -381,9 +602,9 @@ const UI = {
         const nameInput = document.getElementById('editLinkName');
         const iconInput = document.getElementById('editLinkIcon');
         const modalTitle = document.getElementById('linkModalTitle');
-        const submitBtn = modal.querySelector('button[type="submit"]');
+        const submitBtn = modal ? modal.querySelector('button[type="submit"]') : null;
         
-        if (linkData) {
+        if (linkData && modal && urlInput && nameInput && iconInput && modalTitle && submitBtn) {
             // 编辑模式
             modalTitle.textContent = '编辑链接';
             submitBtn.textContent = '保存';
@@ -392,7 +613,7 @@ const UI = {
             iconInput.value = linkData.icon || '';
             modal.dataset.editMode = 'edit';
             modal.dataset.linkId = linkId;
-        } else {
+        } else if (modal && urlInput && nameInput && iconInput && modalTitle && submitBtn) {
             // 添加模式
             modalTitle.textContent = '添加链接';
             submitBtn.textContent = '添加';
@@ -404,8 +625,10 @@ const UI = {
             delete modal.dataset.linkId;
         }
         
-        modal.style.display = 'block';
-        this.showBodyBlur();
+        if (modal) {
+            modal.style.display = 'block';
+            this.showBodyBlur();
+        }
         
         // 确保模态框背景色与当前页面背景匹配
         this.updateModalBackgroundColor();
@@ -418,96 +641,93 @@ const UI = {
         const colorInput = document.getElementById('editSectionBgColor');
         const deleteBtn = document.getElementById('deleteSectionBtn');
         const modalTitle = document.getElementById('sectionModalTitle');
-        const submitBtn = modal.querySelector('button[type="submit"]');
+        const submitBtn = modal ? modal.querySelector('button[type="submit"]') : null;
         
-        // 保存原始颜色值，用于取消操作时恢复
-        let originalBgColor = null;
-        let originalButtonColor = null;
-        
-        if (sectionData) {
-            // 编辑模式
-            modalTitle.textContent = '编辑分组';
-            submitBtn.textContent = '保存';
-            titleInput.value = sectionData.title;
-            const formattedColor = Styles.formatColorValue(sectionData.bgColor);
-            colorInput.value = formattedColor;
-            originalBgColor = sectionData.bgColor;
-            originalButtonColor = sectionData.linkButtonColor || Utils.lightenColor(sectionData.bgColor, 20);
-            modal.dataset.editMode = 'edit';
-            modal.dataset.sectionId = sectionData.id;
+        // 清理之前可能存在的事件监听器
+        if (colorInput) {
+            const newColorInput = colorInput.cloneNode(true);
+            colorInput.parentNode.replaceChild(newColorInput, colorInput);
+            const colorInputUpdated = document.getElementById('editSectionBgColor');
             
-            // 显示删除按钮（如果不是最后一个分组）
-            deleteBtn.style.display = sectionsData.length > 1 ? 'block' : 'none';
-        } else {
-            // 添加模式
-            modalTitle.textContent = '添加分组';
-            submitBtn.textContent = '添加';
-            titleInput.value = '新分组';
-            colorInput.value = '#444444';
-            modal.dataset.editMode = 'add';
-            delete modal.dataset.sectionId;
+            // 保存原始颜色值，用于取消操作时恢复
+            let originalBgColor = null;
+            let originalButtonColor = null;
+            let currentSectionId = null;
             
-            // 隐藏删除按钮
-            deleteBtn.style.display = 'none';
-        }
-        
-        // 更新颜色预览
-        document.getElementById('editSectionColorPreview').style.backgroundColor = colorInput.value;
-        document.getElementById('editSectionColorValue').textContent = colorInput.value;
-        
-        // 实时更新分组背景色和按钮颜色（仅在编辑模式下）
-        const colorInputHandler = function() {
-            const newColor = this.value;
+            if (sectionData && modal && titleInput && colorInputUpdated && deleteBtn && modalTitle && submitBtn) {
+                // 编辑模式
+                modalTitle.textContent = '编辑分组';
+                submitBtn.textContent = '保存';
+                titleInput.value = sectionData.title;
+                const formattedColor = typeof Styles !== 'undefined' && typeof Styles.formatColorValue === 'function' 
+                    ? Styles.formatColorValue(sectionData.backgroundColor) 
+                    : sectionData.backgroundColor;
+                colorInputUpdated.value = formattedColor;
+                originalBgColor = sectionData.backgroundColor;
+                originalButtonColor = sectionData.linkButtonColor || Utils.lightenColor(sectionData.backgroundColor, 20);
+                currentSectionId = sectionData.id;
+                modal.dataset.editMode = 'edit';
+                modal.dataset.sectionId = sectionData.id;
+                
+                // 显示删除按钮（如果不是最后一个分组）
+                deleteBtn.style.display = typeof window.sectionsData !== 'undefined' && window.sectionsData.length > 1 ? 'block' : 'none';
+            } else if (modal && titleInput && colorInputUpdated && deleteBtn && modalTitle && submitBtn) {
+                // 添加模式
+                modalTitle.textContent = '添加分组';
+                submitBtn.textContent = '添加';
+                titleInput.value = '新分组';
+                colorInputUpdated.value = '#444444';
+                currentSectionId = null;
+                modal.dataset.editMode = 'add';
+                delete modal.dataset.sectionId;
+                
+                // 隐藏删除按钮
+                deleteBtn.style.display = 'none';
+            }
             
             // 更新颜色预览
-            document.getElementById('editSectionColorPreview').style.backgroundColor = newColor;
-            document.getElementById('editSectionColorValue').textContent = newColor;
-            
-            // 如果是编辑模式，实时更新分组背景色
-            if (sectionData) {
-                const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionData.id}"]`);
-                if (sectionElement) {
-                    sectionElement.style.backgroundColor = newColor;
-                    
-                    // 实时更新该分组内链接按钮颜色（临时）
-                    const lighterColor = Utils.lightenColor(newColor, 20);
-                    Styles.updateSectionLinkButtonStyle(sectionData.id, lighterColor);
-                }
+            const editSectionColorPreview = document.getElementById('editSectionColorPreview');
+            const editSectionColorValue = document.getElementById('editSectionColorValue');
+            if (editSectionColorPreview) {
+                editSectionColorPreview.style.backgroundColor = colorInputUpdated.value;
             }
-        };
-        
-        // 移除之前可能添加的事件监听器，避免重复绑定
-        const newColorInput = colorInput.cloneNode(true);
-        colorInput.parentNode.replaceChild(newColorInput, colorInput);
-        
-        // 添加实时预览功能
-        newColorInput.addEventListener('input', colorInputHandler);
-        
-        // 监听模态框关闭事件，处理取消操作
-        const handleModalClose = (e) => {
-            // 检查是否是点击模态框外部或按ESC键关闭
-            if ((e.target === modal || e.key === 'Escape') && sectionData && originalBgColor) {
-                // 恢复分组背景色和链接按钮颜色到原始状态
-                const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionData.id}"]`);
-                if (sectionElement) {
-                    sectionElement.style.backgroundColor = originalBgColor;
-                    
-                    // 恢复链接按钮颜色
-                    Styles.updateSectionLinkButtonStyle(sectionData.id, originalButtonColor);
-                }
+            if (editSectionColorValue) {
+                editSectionColorValue.textContent = colorInputUpdated.value;
             }
             
-            // 移除事件监听器
-            window.removeEventListener('click', handleModalClose);
-            window.removeEventListener('keydown', handleModalClose);
-        };
+            // 添加颜色实时预览功能
+            colorInputUpdated.addEventListener('input', function() {
+                const selectedColor = this.value;
+                
+                // 更新颜色预览
+                if (editSectionColorPreview) {
+                    editSectionColorPreview.style.backgroundColor = selectedColor;
+                }
+                if (editSectionColorValue) {
+                    editSectionColorValue.textContent = selectedColor;
+                }
+                
+                // 如果是编辑模式，实时更新分组预览
+                if (modal.dataset.editMode === 'edit' && currentSectionId) {
+                    // 更新分组背景色（带透明度）
+                    const sectionElement = document.querySelector(`.links-section[data-section-id="${currentSectionId}"]`);
+                    if (sectionElement) {
+                        sectionElement.style.backgroundColor = Utils.convertToRGBA(selectedColor, 0.25);
+                    }
+                    
+                    // 计算并更新按钮颜色
+                    const buttonColor = Utils.lightenColor(selectedColor, 20);
+                    if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+                        Styles.updateSectionLinkButtonStyle(currentSectionId, buttonColor);
+                    }
+                }
+            });
+        }
         
-        // 添加关闭事件监听器
-        window.addEventListener('click', handleModalClose);
-        window.addEventListener('keydown', handleModalClose);
-        
-        modal.style.display = 'block';
-        this.showBodyBlur();
+        if (modal) {
+            modal.style.display = 'block';
+            this.showBodyBlur();
+        }
         
         // 确保模态框背景色与当前页面背景匹配
         this.updateModalBackgroundColor();
@@ -522,3 +742,127 @@ const UI = {
         }
     }
 };
+
+// 全局编辑模式变量
+window.isEditMode = false;
+
+// 显示自定义确认对话框
+UI.showConfirmModal = function(message, onConfirm, onCancel) {
+    // 如果已经存在确认模态框，先移除它
+    const existingModal = document.getElementById('confirmModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // 创建确认模态框
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'modal';
+    confirmModal.id = 'confirmModal';
+    confirmModal.style.zIndex = '1003'; // 确保在其他模态框之上
+    
+    confirmModal.innerHTML = `
+        <div class="modal-content glass-effect" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>确认操作</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px;">
+                <button id="confirmCancelBtn" class="glass-button secondary" style="min-width: 80px;">取消</button>
+                <button id="confirmOkBtn" class="glass-button primary" style="min-width: 80px;">确定</button>
+            </div>
+        </div>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(confirmModal);
+    
+    // 显示模态框
+    confirmModal.style.display = 'block';
+    UI.showBodyBlur();
+    
+    // 获取关闭按钮
+    const closeBtn = confirmModal.querySelector('.close');
+    const okBtn = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    
+    // 定义关闭函数
+    const closeConfirmModal = function() {
+        confirmModal.style.display = 'none';
+        UI.hideBodyBlur();
+        confirmModal.remove();
+    };
+    
+    // 绑定事件
+    if (okBtn) {
+        okBtn.addEventListener('click', function() {
+            if (onConfirm && typeof onConfirm === 'function') {
+                onConfirm();
+            }
+            closeConfirmModal();
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            if (onCancel && typeof onCancel === 'function') {
+                onCancel();
+            }
+            closeConfirmModal();
+        });
+    }
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            if (onCancel && typeof onCancel === 'function') {
+                onCancel();
+            }
+            closeConfirmModal();
+        });
+    }
+    
+    // 点击模态框外部关闭
+    confirmModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            if (onCancel && typeof onCancel === 'function') {
+                onCancel();
+            }
+            closeConfirmModal();
+        }
+    });
+    
+    // ESC键关闭
+    const handleEsc = function(e) {
+        if (e.key === 'Escape') {
+            if (onCancel && typeof onCancel === 'function') {
+                onCancel();
+            }
+            closeConfirmModal();
+            document.removeEventListener('keydown', handleEsc);
+        }
+    };
+    
+    document.addEventListener('keydown', handleEsc);
+};
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化所有UI组件
+    if (typeof UI !== 'undefined') {
+        UI.initSettingsPanel();
+        UI.initEditModeToggle();
+        UI.initImportExportFunctions();
+    }
+    
+    // 监听分组背景色变化事件
+    document.addEventListener('sectionBackgroundColorChanged', function(e) {
+        // 当分组背景色改变时，更新该分组内链接按钮的颜色
+        const section = e.target;
+        const backgroundColor = e.detail.color;
+        
+        // 这里可以添加更新链接按钮颜色的逻辑
+        // 如果原项目已有相关功能，这里会自动触发
+    });
+});

@@ -1,3 +1,20 @@
+:root {
+    --link-hover-color: #666666;
+    --extra-accent-color: #888888;
+}
+
+/* 链接按钮悬停效果 */
+.link-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    background-color: var(--link-hover-color, #666666) !important;
+}
+
+/* 分组背景色过渡效果 */
+.section {
+    transition: background-color 0.3s ease;
+}
+
 /* 设置页面基础样式 - 修改背景为渐变色 */
 body {
     margin: 0;

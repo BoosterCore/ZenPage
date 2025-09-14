@@ -5,15 +5,15 @@ const Renderer = {
         const sectionsContainer = document.getElementById('sectionsContainer');
         sectionsContainer.innerHTML = '';
         
-        sectionsData.forEach((section, index) => {
+        window.sectionsData.forEach((section, index) => {
             const sectionElement = document.createElement('div');
             sectionElement.className = 'links-section';
             sectionElement.dataset.sectionId = section.id;
-            sectionElement.style.backgroundColor = section.bgColor;
-            sectionElement.setAttribute('draggable', isEditMode);
+            sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
+            sectionElement.setAttribute('draggable', window.isEditMode);
             
             sectionElement.innerHTML = `
-                <div class="section-header ${isEditMode ? 'drag-handle' : ''}">
+                <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
                     <h2 class="section-title" contenteditable="false">${section.title}</h2>
                 </div>
                 <div class="links-grid" id="linksContainer-${section.id}">
@@ -27,12 +27,14 @@ const Renderer = {
             this.renderLinksForSection(section.id, section.links);
             
             // 应用保存的链接按钮颜色或根据分组背景色计算
-            let buttonColor = section.linkButtonColor || Utils.lightenColor(section.bgColor, 20);
+            let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
             // 保存计算出的颜色
             if (!section.linkButtonColor) {
-                sectionsData[index].linkButtonColor = buttonColor;
+                window.sectionsData[index].linkButtonColor = buttonColor;
             }
-            Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+            if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+                Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+            }
         });
         
         // 根据编辑模式更新UI
@@ -49,18 +51,18 @@ const Renderer = {
         const headerControls = document.querySelector('.header-controls');
         const sectionHeaders = document.querySelectorAll('.section-header');
         
-        if (isEditMode) {
+        if (window.isEditMode) {
             // 显示编辑模式按钮
-            addSectionBtn.style.display = 'inline-block';
-            importConfigBtn.style.display = 'inline-block';
-            exportConfigBtn.style.display = 'inline-block';
+            if (addSectionBtn) addSectionBtn.style.display = 'inline-block';
+            if (importConfigBtn) importConfigBtn.style.display = 'inline-block';
+            if (exportConfigBtn) exportConfigBtn.style.display = 'inline-block';
             
             // 允许标题编辑
-            pageTitle.setAttribute('contenteditable', 'true');
+            if (pageTitle) pageTitle.setAttribute('contenteditable', 'true');
             sectionTitles.forEach(title => title.setAttribute('contenteditable', 'true'));
             
             // 添加编辑模式类名
-            headerControls.classList.add('editing');
+            if (headerControls) headerControls.classList.add('editing');
             sectionHeaders.forEach(header => header.classList.add('edit-mode'));
             
             // 为所有分组标题添加点击事件（用于编辑分组样式）
@@ -68,12 +70,12 @@ const Renderer = {
                 document.querySelectorAll('.section-title').forEach(title => {
                     title.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (isEditMode) {
+                        if (window.isEditMode) {
                             const section = this.closest('.links-section');
                             const sectionId = section.dataset.sectionId;
-                            const sectionData = sectionsData.find(s => s.id === sectionId);
+                            const sectionData = window.sectionsData.find(s => s.id === sectionId);
                             
-                            if (sectionData) {
+                            if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
                                 UI.showSectionEditModal(sectionData);
                             }
                         }
@@ -83,33 +85,43 @@ const Renderer = {
             
             // 添加编辑覆盖层
             setTimeout(() => {
-                UI.addEditOverlays();
-                Links.bindEditDeleteEvents();
+                if (typeof UI !== 'undefined' && typeof UI.addEditOverlays === 'function') {
+                    UI.addEditOverlays();
+                }
+                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                    Links.bindEditDeleteEvents();
+                }
             }, 50);
             
             // 初始化拖拽功能
             setTimeout(() => {
-                DragDrop.initDragAndDrop();
+                if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
+                    DragDrop.initDragAndDrop();
+                }
             }, 100);
         } else {
             // 隐藏编辑模式按钮
-            addSectionBtn.style.display = 'none';
-            importConfigBtn.style.display = 'none';
-            exportConfigBtn.style.display = 'none';
+            if (addSectionBtn) addSectionBtn.style.display = 'none';
+            if (importConfigBtn) importConfigBtn.style.display = 'none';
+            if (exportConfigBtn) exportConfigBtn.style.display = 'none';
             
             // 禁止标题编辑
-            pageTitle.setAttribute('contenteditable', 'false');
+            if (pageTitle) pageTitle.setAttribute('contenteditable', 'false');
             sectionTitles.forEach(title => title.setAttribute('contenteditable', 'false'));
             
             // 移除编辑模式类名
-            headerControls.classList.remove('editing');
+            if (headerControls) headerControls.classList.remove('editing');
             sectionHeaders.forEach(header => header.classList.remove('edit-mode'));
             
             // 移除编辑覆盖层
-            UI.removeEditOverlays();
+            if (typeof UI !== 'undefined' && typeof UI.removeEditOverlays === 'function') {
+                UI.removeEditOverlays();
+            }
             
             // 清理拖拽功能
-            DragDrop.cleanupDragAndDrop();
+            if (typeof DragDrop !== 'undefined' && typeof DragDrop.cleanupDragAndDrop === 'function') {
+                DragDrop.cleanupDragAndDrop();
+            }
         }
     },
     
@@ -123,7 +135,7 @@ const Renderer = {
         links.forEach(link => {
             const linkItem = document.createElement('div');
             linkItem.className = 'link-item';
-            if (isEditMode) {
+            if (window.isEditMode) {
                 linkItem.classList.add('edit-mode');
             }
             linkItem.dataset.linkId = link.id;
@@ -149,7 +161,7 @@ const Renderer = {
         });
         
         // 如果在编辑模式下，添加"添加链接"的占位符按钮
-        if (isEditMode) {
+        if (window.isEditMode) {
             const addLinkPlaceholder = document.createElement('div');
             addLinkPlaceholder.className = 'link-item';
             addLinkPlaceholder.innerHTML = `
@@ -161,15 +173,23 @@ const Renderer = {
             linksContainer.appendChild(addLinkPlaceholder);
             
             // 绑定点击事件
-            addLinkPlaceholder.querySelector('.add-link-placeholder').addEventListener('click', function(e) {
-                e.stopPropagation();
-                UI.showLinkEditModal(null);
-                document.getElementById('linkEditModal').dataset.currentSectionId = sectionId;
-            });
+            const placeholder = addLinkPlaceholder.querySelector('.add-link-placeholder');
+            if (placeholder) {
+                placeholder.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (typeof UI !== 'undefined' && typeof UI.showLinkEditModal === 'function') {
+                        UI.showLinkEditModal(null);
+                        const modal = document.getElementById('linkEditModal');
+                        if (modal) {
+                            modal.dataset.currentSectionId = sectionId;
+                        }
+                    }
+                });
+            }
         }
         
         // 如果在编辑模式下，添加编辑覆盖层
-        if (isEditMode) {
+        if (window.isEditMode) {
             // 为真实链接项添加编辑覆盖层（排除添加链接按钮）
             setTimeout(() => {
                 document.querySelectorAll(`#linksContainer-${sectionId} .link-item`).forEach(item => {
@@ -192,7 +212,9 @@ const Renderer = {
                 
                 // 重新绑定编辑和删除事件
                 setTimeout(() => {
-                    Links.bindEditDeleteEvents();
+                    if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                        Links.bindEditDeleteEvents();
+                    }
                 }, 10);
             }, 50);
         }
@@ -200,7 +222,7 @@ const Renderer = {
     
     // 局部更新特定分组
     updateSection(sectionId) {
-        const section = sectionsData.find(s => s.id === sectionId);
+        const section = window.sectionsData.find(s => s.id === sectionId);
         if (!section) return;
         
         const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionId}"]`);
@@ -217,32 +239,36 @@ const Renderer = {
         }
         
         // 更新分组背景色
-        sectionElement.style.backgroundColor = section.bgColor;
+        sectionElement.style.backgroundColor = section.backgroundColor;
         
         // 重新渲染该分组的链接
         this.renderLinksForSection(sectionId, section.links);
         
         // 更新链接按钮样式
-        let buttonColor = section.linkButtonColor || Utils.lightenColor(section.bgColor, 20);
+        let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
         // 保存计算出的颜色
-        const sectionIndex = sectionsData.findIndex(s => s.id === sectionId);
+        const sectionIndex = window.sectionsData.findIndex(s => s.id === sectionId);
         if (sectionIndex !== -1 && !section.linkButtonColor) {
-            sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            window.sectionsData[sectionIndex].linkButtonColor = buttonColor;
         }
-        Styles.updateSectionLinkButtonStyle(sectionId, buttonColor);
+        if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+            Styles.updateSectionLinkButtonStyle(sectionId, buttonColor);
+        }
         
         // 如果在编辑模式下，重新绑定事件
-        if (isEditMode) {
+        if (window.isEditMode) {
             setTimeout(() => {
-                Links.bindEditDeleteEvents();
+                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                    Links.bindEditDeleteEvents();
+                }
                 // 重新绑定分组标题点击事件
                 const titleElement = sectionElement.querySelector('.section-title');
                 if (titleElement) {
                     titleElement.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (isEditMode) {
-                            const sectionData = sectionsData.find(s => s.id === sectionId);
-                            if (sectionData) {
+                        if (window.isEditMode) {
+                            const sectionData = window.sectionsData.find(s => s.id === sectionId);
+                            if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
                                 UI.showSectionEditModal(sectionData);
                             }
                         }
@@ -258,11 +284,11 @@ const Renderer = {
         const sectionElement = document.createElement('div');
         sectionElement.className = 'links-section';
         sectionElement.dataset.sectionId = section.id;
-        sectionElement.style.backgroundColor = section.bgColor;
-        sectionElement.setAttribute('draggable', isEditMode);
+        sectionElement.style.backgroundColor = section.backgroundColor;
+        sectionElement.setAttribute('draggable', window.isEditMode);
         
         sectionElement.innerHTML = `
-            <div class="section-header ${isEditMode ? 'drag-handle' : ''}">
+            <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
                 <h2 class="section-title" contenteditable="false">${section.title}</h2>
             </div>
             <div class="links-grid" id="linksContainer-${section.id}">
@@ -276,27 +302,35 @@ const Renderer = {
         this.renderLinksForSection(section.id, section.links);
         
         // 应用链接按钮颜色
-        let buttonColor = section.linkButtonColor || Utils.lightenColor(section.bgColor, 20);
+        let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
         // 保存计算出的颜色
-        const sectionIndex = sectionsData.findIndex(s => s.id === section.id);
+        const sectionIndex = window.sectionsData.findIndex(s => s.id === section.id);
         if (sectionIndex !== -1 && !section.linkButtonColor) {
-            sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            window.sectionsData[sectionIndex].linkButtonColor = buttonColor;
         }
-        Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+        if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+            Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+        }
         
         // 如果在编辑模式下，绑定事件
-        if (isEditMode) {
+        if (window.isEditMode) {
             setTimeout(() => {
-                Links.bindEditDeleteEvents();
-                DragDrop.initDragAndDrop();
+                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                    Links.bindEditDeleteEvents();
+                }
+                if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
+                    DragDrop.initDragAndDrop();
+                }
                 
                 // 绑定分组标题点击事件
                 const titleElement = sectionElement.querySelector('.section-title');
                 if (titleElement) {
                     titleElement.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (isEditMode) {
-                            UI.showSectionEditModal(section);
+                        if (window.isEditMode) {
+                            if (typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
+                                UI.showSectionEditModal(section);
+                            }
                         }
                     });
                 }

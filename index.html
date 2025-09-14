@@ -89,6 +89,18 @@
                         <span id="gradientAngleValue">90°</span>
                     </div>
                 </div>
+
+                <div class="setting-group">
+                    <label for="imageUpload">UI幻化 (上传图片自动生成配色):</label>
+                    <input type="file" id="imageUpload" accept="image/*" class="glass-input">
+                    <div class="ui-magic-preview" id="colorPalettePreview" style="display: none; margin-top: 10px;">
+                        <div class="color-palette-container">
+                            <div class="palette-title">提取的颜色：</div>
+                            <div id="colorPalette" class="color-palette"></div>
+                        </div>
+                    </div>
+                    <button id="applyColorScheme" class="glass-button primary" style="margin-top: 10px; display: none;">应用配色方案</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="resetStyles" class="glass-button secondary">重置</button>
@@ -170,5 +182,6 @@
     <script src="js/sections.js"></script>
     <script src="js/dragdrop.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/uiMagic.js"></script>
 </body>
 </html>

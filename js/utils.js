@@ -113,12 +113,20 @@ const Utils = {
     
     // 生成基于颜色的渐变色（与CSS中定义的渐变保持一致）
     generateGradientFromColor(baseColor, angle = '90') {
-        // 将十六进制颜色转换为RGB
         let r, g, b;
+        
+        // 解析十六进制颜色
         if (baseColor.startsWith('#')) {
-            r = parseInt(baseColor.substring(1, 3), 16);
-            g = parseInt(baseColor.substring(3, 5), 16);
-            b = parseInt(baseColor.substring(5, 7), 16);
+            // 处理3位十六进制颜色
+            if (baseColor.length === 4) {
+                r = parseInt(baseColor[1] + baseColor[1], 16);
+                g = parseInt(baseColor[2] + baseColor[2], 16);
+                b = parseInt(baseColor[3] + baseColor[3], 16);
+            } else {
+                r = parseInt(baseColor.substring(1, 3), 16);
+                g = parseInt(baseColor.substring(3, 5), 16);
+                b = parseInt(baseColor.substring(5, 7), 16);
+            }
         } else if (baseColor.startsWith('rgb')) {
             const match = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
             if (match) {
@@ -128,32 +136,80 @@ const Utils = {
             }
         }
         
-        // 计算渐变中的其他颜色值，使其与CSS中的定义保持一致风格
-        // 最暗色 (对应CSS中的#1a1a1a)
+        if (r === undefined || g === undefined || b === undefined) {
+            // 默认颜色
+            r = 51; g = 51; b = 51; // #333333
+        }
+        
+        // 计算渐变中的其他颜色值
+        // 最暗色 (比基础色暗37)
         const darkestR = Math.max(0, r - 37);
         const darkestG = Math.max(0, g - 37);
         const darkestB = Math.max(0, b - 37);
         
-        // 中间深色 (对应CSS中的#333333)
-        const darkR = Math.max(0, r - 0);
-        const darkG = Math.max(0, g - 0);
-        const darkB = Math.max(0, b - 0);
+        // 中间深色 (基础色)
+        const darkR = r;
+        const darkG = g;
+        const darkB = b;
         
-        // 中间浅色 (对应CSS中的#4d4d4d)
+        // 中间浅色 (比基础色亮27)
         const lightR = Math.min(255, r + 27);
         const lightG = Math.min(255, g + 27);
         const lightB = Math.min(255, b + 27);
         
-        // 最浅色 (对应CSS中的#666666)
+        // 最浅色 (比基础色亮40)
         const lightestR = Math.min(255, r + 40);
         const lightestG = Math.min(255, g + 40);
         const lightestB = Math.min(255, b + 40);
         
-        // 返回与CSS一致的4色渐变
+        // 返回4色渐变
         return `linear-gradient(${angle}deg, 
             rgb(${darkestR}, ${darkestG}, ${darkestB}) 0%, 
             rgb(${darkR}, ${darkG}, ${darkB}) 60%, 
             rgb(${lightR}, ${lightG}, ${lightB}) 90%, 
             rgb(${lightestR}, ${lightestG}, ${lightestB}) 100%)`;
     }
+};
+
+// 颜色处理工具函数
+Utils.convertToRGBA = function(hex, alpha) {
+    // 移除#前缀
+    hex = hex.replace('#', '');
+    
+    // 解析十六进制颜色值
+    if (hex.length === 3) {
+        hex = hex.split('').map(char => char + char).join('');
+    }
+    
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+Utils.lightenColor = function(color, percent) {
+    // 移除#前缀
+    color = color.replace('#', '');
+    
+    // 解析十六进制颜色值
+    if (color.length === 3) {
+        color = color.split('').map(char => char + char).join('');
+    }
+    
+    let r = parseInt(color.substring(0, 2), 16);
+    let g = parseInt(color.substring(2, 4), 16);
+    let b = parseInt(color.substring(4, 6), 16);
+    
+    // 增加亮度
+    r = Math.min(255, r + Math.round((255 - r) * (percent / 100)));
+    g = Math.min(255, g + Math.round((255 - g) * (percent / 100)));
+    b = Math.min(255, b + Math.round((255 - b) * (percent / 100)));
+    
+    // 转换回十六进制
+    const rr = r.toString(16).padStart(2, '0');
+    const gg = g.toString(16).padStart(2, '0');
+    const bb = b.toString(16).padStart(2, '0');
+    
+    return `#${rr}${gg}${bb}`;
 };
