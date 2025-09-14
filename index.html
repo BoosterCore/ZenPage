@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的导航页面</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- 页面内容包装器 -->
+    <div id="content-wrapper">
+        <div class="container">
+            <!-- 头部控制按钮 -->
+            <div class="header-controls">
+                <div class="control-buttons">
+                    <button id="addSectionBtn" class="add-section-btn" style="display: none;">+ 添加分组</button>
+                    <button id="importConfigBtn" class="import-export-btn" style="display: none;">↓ 导入配置</button>
+                    <button id="exportConfigBtn" class="import-export-btn" style="display: none;">↑ 导出配置</button>
+                    <input type="file" id="importConfigInput" accept=".json" style="display: none;">
+                    <button id="editModeToggle" class="edit-toggle-btn">编辑模式</button>
+                </div>
+            </div>
+            
+            <h1 id="pageTitle" contenteditable="false">我要去冲浪！</h1>
+            
+            <div id="sectionsContainer">
+                <!-- 分组将通过JavaScript渲染 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h3>页面设置</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="pageTitleInput">页面标题:</label>
+                    <input type="text" id="pageTitleInput" class="glass-input" placeholder="请输入页面标题">
+                </div>
+                
+                <div class="setting-group">
+                    <label for="fontFamily">标题字体:</label>
+                    <select id="fontFamily" class="glass-input">
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
+                    </select>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="fontSize">标题字号:</label>
+                    <div class="slider-container">
+                        <input type="range" id="fontSize" min="20" max="100" value="56" class="glass-slider">
+                        <span id="fontSizeValue">56px</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="fontColor">标题颜色:</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="fontColor" value="#ffffff" class="glass-color-picker">
+                        <div id="fontColorPreview" class="color-preview" style="background-color: #ffffff;"></div>
+                        <span id="fontColorValue">#ffffff</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="pageBgColor">页面底色:</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="pageBgColor" value="#333333" class="glass-color-picker">
+                        <div id="pageBgColorPreview" class="color-preview" style="background-color: #333333;"></div>
+                        <span id="pageBgColorValue">#333333</span>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="gradientAngle">渐变角度:</label>
+                    <div class="slider-container">
+                        <input type="range" id="gradientAngle" min="0" max="360" value="90" class="glass-slider">
+                        <span id="gradientAngleValue">90°</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="resetStyles" class="glass-button secondary">重置</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 链接编辑模态框 -->
+    <div class="modal" id="linkEditModal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h3 id="linkModalTitle">编辑链接</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="linkEditForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editLinkUrl">链接地址:</label>
+                        <input type="url" id="editLinkUrl" required class="glass-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLinkName">链接名称:</label>
+                        <input type="text" id="editLinkName" required class="glass-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="editLinkIcon">图标 (emoji或文本):</label>
+                        <input type="text" id="editLinkIcon" maxlength="4" class="glass-input">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="glass-button primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 分组编辑模态框 -->
+    <div class="modal" id="sectionEditModal">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h3 id="sectionModalTitle">编辑分组</h3>
+                <span class="close">&times;</span>
+            </div>
+            <form id="sectionEditForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editSectionTitle">分组标题:</label>
+                        <input type="text" id="editSectionTitle" required class="glass-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="editSectionBgColor">分组背景色:</label>
+                        <div class="color-picker-container with-note">
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <input type="color" id="editSectionBgColor" value="#444444" class="glass-color-picker">
+                                <div id="editSectionColorPreview" class="color-preview" style="background-color: #444444;"></div>
+                                <span id="editSectionColorValue">#444444</span>
+                            </div>
+                            <div class="section-edit-preview-note">注意！颜色调整能实时预览，但保存后才实际生效！</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="glass-button primary">保存</button>
+                    <button type="button" id="deleteSectionBtn" class="glass-button danger">删除分组</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 背景遮罩层 -->
+    <div id="modalBackdrop" class="modal-backdrop"></div>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/styles.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/links.js"></script>
+    <script src="js/sections.js"></script>
+    <script src="js/dragdrop.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

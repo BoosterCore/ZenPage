@@ -1,0 +1,416 @@
+/* 设置页面基础样式 - 修改背景为渐变色 */
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #1a1a1a 0%, #333333 60%, #4d4d4d 90%, #666666 100%);
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+/* 容器样式 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 头部控制按钮 */
+.header-controls {
+    text-align: right;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+/* 控制按钮容器 */
+.control-buttons {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+/* 普通模式下隐藏按钮 */
+.header-controls:not(.editing) .control-buttons {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* 鼠标悬浮时显示按钮 */
+.header-controls:not(.editing):hover .control-buttons {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 编辑模式切换按钮 */
+.edit-toggle-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    margin-left: 10px;
+}
+
+.edit-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.edit-toggle-btn.edit-mode {
+    background: rgba(255, 107, 107, 0.7);
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
+.edit-toggle-btn.edit-mode:hover {
+    background: rgba(255, 82, 82, 0.8);
+    border-color: rgba(255, 82, 82, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 标题样式 */
+#pageTitle {
+    text-align: center;
+    font-size: 3.5em;
+    color: white;
+    margin: 20px 0;
+    padding: 15px;
+    outline: none;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    text-shadow: 
+        3px 3px 6px rgba(0, 0, 0, 0.7),
+        0 0 10px rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+/* 链接分组样式 */
+.links-section {
+    background-color: rgba(68, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* 添加这些建议的优化代码 */
+.links-section.dragging {
+    will-change: transform, opacity;
+    /* 可选：添加硬件加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.links-section.drag-over {
+    border: 2px dashed #ffffff;
+    background-color: #555555;
+}
+
+.links-section.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+}
+
+/* 分组标题区域 */
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    cursor: move;
+}
+
+.section-header.drag-handle {
+    cursor: move;
+}
+
+.section-title {
+    color: white;
+    margin: 0;
+    padding: 10px 15px;
+    outline: none;
+    font-size: 1.5em;
+    background-color: transparent;
+    border: none;
+    flex: 0 0 auto;
+    width: auto;
+    display: inline-block;
+}
+
+.section-title:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* 编辑模式下分组标题的样式 */
+.section-header.edit-mode .section-title {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.section-header.edit-mode .section-title:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 链接网格容器样式 */
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+/* 链接项容器 */
+.link-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 链接按钮样式 */
+.link-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 10px;
+    background-color: rgba(85, 85, 85, 0.25);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    height: 100%;
+}
+
+.link-button:hover {
+    background-color: #666666;
+    transform: translateY(-5px);
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 添加链接的特殊按钮样式 */
+.add-link-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 10px;
+    background-color: rgba(85, 85, 85, 0.25);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    flex: 1;
+    height: 100%;
+    border: 2px dashed #ffffff;
+}
+
+.add-link-placeholder:hover {
+    background-color: #666666;
+    transform: translateY(-5px);
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 链接图标样式 */
+.link-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    margin-bottom: 10px;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+}
+
+/* 链接名称样式 */
+.link-name {
+    font-size: 1em;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* 编辑模式下的链接项 */
+.link-item.edit-mode .link-edit-overlay {
+    position: absolute;
+    top: auto;
+    left: auto;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 2;
+    padding: 3px;
+}
+
+/* 编辑/删除按钮 */
+.edit-link-btn,
+.delete-link-btn {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 4px 8px;
+    margin: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    min-width: 50px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    color: white;
+    font-weight: 500;
+}
+
+.edit-link-btn {
+    background: rgba(100, 100, 100, 0.5);
+}
+
+.edit-link-btn:hover {
+    background: rgba(120, 120, 120, 0.7);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.delete-link-btn {
+    background: rgba(255, 68, 68, 0.5);
+}
+
+.delete-link-btn:hover {
+    background: rgba(255, 40, 40, 0.7);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 添加分组按钮 */
+.add-section-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: inline-block;
+}
+
+.add-section-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 导入/导出按钮样式 */
+.import-export-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.import-export-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 编辑模式下始终显示按钮 */
+.header-controls.editing .control-buttons {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* 分组容器 */
+#sectionsContainer {
+    margin-top: 30px;
+}
+
+/* favicon图片样式 */
+.link-icon img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    display: block;
+}
+
+/* 页面模糊效果 */
+.body-blur #content-wrapper {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+
+/* 模态框背景遮罩 */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: none;
+}
+
+/* 确保模态框在最上层 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1002;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 毛玻璃效果基础样式 */
+.glass-effect {
+    background: rgba(100, 100, 100, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* 模态框统一样式 */
+.modal-content {
+    background-color: rgba(100, 100, 100, 0.5);
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
