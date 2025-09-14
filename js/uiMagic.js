@@ -44,8 +44,8 @@ const UIMagic = {
                     // 颜色统计
                     const colorCounts = {};
                     
-                    // 分析所有像素（每隔20个像素采样以提高性能）
-                    for (let i = 0; i < data.length; i += 80) {
+                    // 分析所有像素（每隔10个像素采样以提高性能）
+                    for (let i = 0; i < data.length; i += 40) {
                         const r = data[i];
                         const g = data[i + 1];
                         const b = data[i + 2];
@@ -62,8 +62,8 @@ const UIMagic = {
                         // 如果颜色饱和度太低（接近灰色），则跳过
                         if (diff < 20) continue;
                         
-                        // 创建颜色键值（使用更精细的分组）
-                        const key = `${Math.floor(r/10)*10},${Math.floor(g/10)*10},${Math.floor(b/10)*10}`;
+                        // 创建颜色键值（使用RGB原值，不进行分组）
+                        const key = `${r},${g},${b}`;
                         
                         if (!colorCounts[key]) {
                             colorCounts[key] = 0;
@@ -71,28 +71,8 @@ const UIMagic = {
                         colorCounts[key]++;
                     }
                     
-                    // 如果没有足够的彩色像素，分析所有像素
-                    if (Object.keys(colorCounts).length < 10) {
-                        for (let i = 0; i < data.length; i += 40) {
-                            const r = data[i];
-                            const g = data[i + 1];
-                            const b = data[i + 2];
-                            const a = data[i + 3];
-                            
-                            // 忽略透明度太低的像素
-                            if (a < 128) continue;
-                            
-                            const key = `${Math.floor(r/15)*15},${Math.floor(g/15)*15},${Math.floor(b/15)*15}`;
-                            
-                            if (!colorCounts[key]) {
-                                colorCounts[key] = 0;
-                            }
-                            colorCounts[key]++;
-                        }
-                    }
-                    
                     // 转换为颜色数组并按出现频率排序
-                    const colors = Object.keys(colorCounts)
+                    let colors = Object.keys(colorCounts)
                         .map(key => {
                             const [r, g, b] = key.split(',').map(Number);
                             return {
@@ -103,14 +83,54 @@ const UIMagic = {
                         })
                         .sort((a, b) => b.count - a.count);
                     
-                    // 如果颜色太少，返回前10个颜色
-                    if (colors.length < 10) {
+                    // 如果颜色太少，降低饱和度阈值重新采样
+                    if (colors.length < 6) {
+                        const colorCounts2 = {};
+                        for (let i = 0; i < data.length; i += 20) {
+                            const r = data[i];
+                            const g = data[i + 1];
+                            const b = data[i + 2];
+                            const a = data[i + 3];
+                            
+                            // 忽略透明度太低的像素
+                            if (a < 128) continue;
+                            
+                            // 降低饱和度要求
+                            const max = Math.max(r, g, b);
+                            const min = Math.min(r, g, b);
+                            const diff = max - min;
+                            
+                            if (diff < 10) continue;
+                            
+                            // 使用RGB原值
+                            const key = `${r},${g},${b}`;
+                            
+                            if (!colorCounts2[key]) {
+                                colorCounts2[key] = 0;
+                            }
+                            colorCounts2[key]++;
+                        }
+                        
+                        colors = Object.keys(colorCounts2)
+                            .map(key => {
+                                const [r, g, b] = key.split(',').map(Number);
+                                return {
+                                    r, g, b,
+                                    count: colorCounts2[key],
+                                    hex: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+                                };
+                            })
+                            .sort((a, b) => b.count - a.count);
+                    }
+                    
+                    // 如果颜色还是太少，返回所有找到的颜色
+                    if (colors.length < 6) {
                         resolve(colors);
                         return;
                     }
                     
                     // 过滤掉过于接近的颜色，保留最具代表性的颜色
-                    const filteredColors = this.filterSimilarColors(colors, 10);
+                    const filteredColors = UIMagic.filterSimilarColors(colors, 10);
                     
                     // 确保有足够的颜色
                     while (filteredColors.length < 6 && colors.length > filteredColors.length) {
@@ -170,7 +190,7 @@ const UIMagic = {
                             Math.abs(currentColor.b - selectedColor.b);
                 
                 // 如果颜色差异小于阈值，则认为是相似颜色
-                if (diff < 35) { // 进一步降低相似性阈值
+                if (diff < 30) { // 降低相似性阈值
                     isSimilar = true;
                     break;
                 }
