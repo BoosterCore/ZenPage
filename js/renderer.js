@@ -2,43 +2,81 @@
 const Renderer = {
     // 渲染所有分组
     renderSections() {
-        const sectionsContainer = document.getElementById('sectionsContainer');
-        sectionsContainer.innerHTML = '';
-        
-        window.sectionsData.forEach((section, index) => {
-            const sectionElement = document.createElement('div');
-            sectionElement.className = 'links-section';
-            sectionElement.dataset.sectionId = section.id;
-            sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
-            sectionElement.setAttribute('draggable', window.isEditMode);
-            
-            sectionElement.innerHTML = `
-                <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
-                    <h2 class="section-title" contenteditable="false">${section.title}</h2>
-                </div>
-                <div class="links-grid" id="linksContainer-${section.id}">
-                    <!-- 链接按钮将通过JavaScript渲染 -->
-                </div>
-            `;
-            
-            sectionsContainer.appendChild(sectionElement);
-            
-            // 渲染该分组的链接
-            this.renderLinksForSection(section.id, section.links);
-            
-            // 应用保存的链接按钮颜色或根据分组背景色计算
-            let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
-            // 保存计算出的颜色
-            if (!section.linkButtonColor) {
-                window.sectionsData[index].linkButtonColor = buttonColor;
+        try {
+            const sectionsContainer = document.getElementById('sectionsContainer');
+            if (!sectionsContainer) {
+                console.error('找不到sectionsContainer元素');
+                return;
             }
-            if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
-                Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+            
+            sectionsContainer.innerHTML = '';
+            
+            // 确保window.sectionsData存在且为数组
+            if (!window.sectionsData || !Array.isArray(window.sectionsData)) {
+                console.warn('sectionsData不存在或不是数组，创建默认分组');
+                window.sectionsData = [{
+                    id: 'default-section',
+                    title: '默认分组',
+                    backgroundColor: '#444444',
+                    links: []
+                }];
             }
-        });
-        
-        // 根据编辑模式更新UI
-        this.updateEditModeUI();
+            
+            window.sectionsData.forEach((section, index) => {
+                // 确保必需的属性存在
+                if (!section.id) section.id = 'section' + (index + 1);
+                if (!section.title) section.title = '新分组';
+                if (!section.backgroundColor) section.backgroundColor = '#444444';
+                if (!section.links) section.links = [];
+                
+                // 确保链接都有id属性
+                section.links.forEach((link, linkIndex) => {
+                    if (!link.id) {
+                        link.id = `${section.id}-link-${linkIndex}`;
+                    }
+                });
+                
+                const sectionElement = document.createElement('div');
+                sectionElement.className = 'links-section';
+                sectionElement.dataset.sectionId = section.id;
+                sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
+                sectionElement.setAttribute('draggable', window.isEditMode);
+                
+                sectionElement.innerHTML = `
+                    <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
+                        <h2 class="section-title" contenteditable="false">${section.title}</h2>
+                    </div>
+                    <div class="links-grid" id="linksContainer-${section.id}">
+                        <!-- 链接按钮将通过JavaScript渲染 -->
+                    </div>
+                `;
+                
+                sectionsContainer.appendChild(sectionElement);
+                
+                // 渲染该分组的链接
+                this.renderLinksForSection(section.id, section.links);
+                
+                // 应用保存的链接按钮颜色或根据分组背景色计算
+                let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
+                // 保存计算出的颜色
+                if (!section.linkButtonColor) {
+                    window.sectionsData[index].linkButtonColor = buttonColor;
+                }
+                if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+                    Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
+                }
+            });
+            
+            // 根据编辑模式更新UI
+            this.updateEditModeUI();
+        } catch (error) {
+            console.error('渲染分组时出错:', error);
+            // 显示错误信息
+            const sectionsContainer = document.getElementById('sectionsContainer');
+            if (sectionsContainer) {
+                sectionsContainer.innerHTML = '<div style="color: red; text-align: center; padding: 20px;">内容加载失败，请检查控制台错误信息</div>';
+            }
+        }
     },
     
     // 根据编辑模式更新UI元素

@@ -3,17 +3,36 @@
 
 // 初始化分组数据的函数
 function initSectionsData() {
-    if (typeof window.sectionsData === 'undefined') {
-        window.sectionsData = JSON.parse(localStorage.getItem('sectionsData')) || [
+    try {
+        if (typeof window.sectionsData === 'undefined') {
+            const savedData = localStorage.getItem('sectionsData');
+            if (savedData) {
+                window.sectionsData = JSON.parse(savedData);
+            } else {
+                window.sectionsData = [
+                    {
+                        id: 'section1',
+                        title: '常用网站',
+                        backgroundColor: '#444444',
+                        links: []
+                    },
+                    {
+                        id: 'section2',
+                        title: '开发工具',
+                        backgroundColor: '#555555',
+                        links: []
+                    }
+                ];
+            }
+        }
+    } catch (error) {
+        console.error('初始化分组数据时出错，使用默认数据:', error);
+        window.sectionsData = [
             {
                 id: 'section1',
                 title: '常用网站',
-                backgroundColor: '#444444'
-            },
-            {
-                id: 'section2',
-                title: '开发工具',
-                backgroundColor: '#555555'
+                backgroundColor: '#444444',
+                links: []
             }
         ];
     }

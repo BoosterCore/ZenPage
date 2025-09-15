@@ -171,6 +171,66 @@ const UI = {
             });
         }
         
+        // 页面底色设置
+        const pageBgColor = document.getElementById('pageBgColor');
+        if (pageBgColor) {
+            pageBgColor.addEventListener('input', function() {
+                // 获取当前渐变角度
+                const gradientAngle = document.getElementById('gradientAngle');
+                const angle = gradientAngle ? gradientAngle.value : '90';
+                
+                // 生成渐变背景
+                const gradient = Utils.generateGradientFromColor(this.value, angle);
+                document.body.style.background = gradient;
+                
+                // 保存到localStorage
+                localStorage.setItem('pageBgColor', this.value);
+                localStorage.setItem('pageBgGradient', gradient);
+                
+                // 更新颜色预览
+                const pageBgColorPreview = document.getElementById('pageBgColorPreview');
+                if (pageBgColorPreview) {
+                    pageBgColorPreview.style.backgroundColor = this.value;
+                }
+                const pageBgColorValue = document.getElementById('pageBgColorValue');
+                if (pageBgColorValue) {
+                    pageBgColorValue.textContent = this.value;
+                }
+                
+                // 更新模态框背景色
+                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+                    UI.updateModalBackgroundColor();
+                }
+            });
+        }
+        
+        // 渐变角度设置
+        const gradientAngle = document.getElementById('gradientAngle');
+        const gradientAngleValue = document.getElementById('gradientAngleValue');
+        if (gradientAngle && gradientAngleValue) {
+            gradientAngle.addEventListener('input', function() {
+                // 更新角度显示
+                gradientAngleValue.textContent = this.value + '°';
+                
+                // 获取当前背景色
+                const pageBgColor = document.getElementById('pageBgColor');
+                const color = pageBgColor ? pageBgColor.value : '#333333';
+                
+                // 生成新的渐变背景
+                const gradient = Utils.generateGradientFromColor(color, this.value);
+                document.body.style.background = gradient;
+                
+                // 保存到localStorage
+                localStorage.setItem('gradientAngle', this.value);
+                localStorage.setItem('pageBgGradient', gradient);
+                
+                // 更新模态框背景色
+                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+                    UI.updateModalBackgroundColor();
+                }
+            });
+        }
+        
         // UI幻化功能 - 图片上传处理
         const imageUpload = document.getElementById('imageUpload');
         const colorPalettePreview = document.getElementById('colorPalettePreview');
@@ -263,6 +323,34 @@ const UI = {
                         this.textContent = originalText;
                         this.style.background = '';
                     }, 2000);
+                }
+            });
+        }
+        
+        // 重置样式按钮
+        const resetStylesBtn = document.getElementById('resetStyles');
+        if (resetStylesBtn) {
+            resetStylesBtn.addEventListener('click', function() {
+                if (typeof Styles !== 'undefined' && typeof Styles.resetTitleStyles === 'function') {
+                    Styles.resetTitleStyles();
+                }
+                
+                // 重置页面背景色和渐变角度控件
+                const pageBgColor = document.getElementById('pageBgColor');
+                const pageBgColorPreview = document.getElementById('pageBgColorPreview');
+                const pageBgColorValue = document.getElementById('pageBgColorValue');
+                const gradientAngle = document.getElementById('gradientAngle');
+                const gradientAngleValue = document.getElementById('gradientAngleValue');
+                
+                if (pageBgColor) pageBgColor.value = '#333333';
+                if (pageBgColorPreview) pageBgColorPreview.style.backgroundColor = '#333333';
+                if (pageBgColorValue) pageBgColorValue.textContent = '#333333';
+                if (gradientAngle) gradientAngle.value = '90';
+                if (gradientAngleValue) gradientAngleValue.textContent = '90°';
+                
+                // 更新模态框背景色
+                if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+                    UI.updateModalBackgroundColor();
                 }
             });
         }

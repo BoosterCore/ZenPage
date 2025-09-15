@@ -34,12 +34,12 @@ const DragDrop = {
         });
         
         // 重置拖拽源元素
-        dragSrcElement = null;
+        this.dragSrcElement = null;
     },
     
     // 拖拽开始
     handleDragStart(e) {
-        dragSrcElement = e.target;
+        this.dragSrcElement = e.target;
         e.target.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
     },
@@ -55,7 +55,7 @@ const DragDrop = {
     
     // 拖拽进入
     handleDragEnter(e) {
-        if (e.target !== dragSrcElement) {
+        if (e.target !== this.dragSrcElement) {
             e.target.classList.add('drag-over');
         }
     },
@@ -71,20 +71,22 @@ const DragDrop = {
             e.stopPropagation();
         }
         
-        if (dragSrcElement !== e.target) {
+        if (this.dragSrcElement !== e.target) {
             // 获取源分组和目标分组的索引
             const sections = Array.from(document.querySelectorAll('.links-section'));
-            const srcIndex = sections.indexOf(dragSrcElement);
+            const srcIndex = sections.indexOf(this.dragSrcElement);
             const targetIndex = sections.indexOf(e.target);
             
             if (srcIndex !== -1 && targetIndex !== -1) {
                 // 重新排列数据
-                const [movedSection] = sectionsData.splice(srcIndex, 1);
-                sectionsData.splice(targetIndex, 0, movedSection);
+                const [movedSection] = window.sectionsData.splice(srcIndex, 1);
+                window.sectionsData.splice(targetIndex, 0, movedSection);
                 
                 // 保存并重新渲染
-                Data.saveSectionsData();
-                Renderer.renderSections();
+                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                    Renderer.renderSections();
+                }
             }
         }
         
@@ -97,5 +99,6 @@ const DragDrop = {
         document.querySelectorAll('.links-section').forEach(section => {
             section.classList.remove('drag-over');
         });
+        this.dragSrcElement = null;
     }
 };
