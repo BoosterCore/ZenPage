@@ -1,3 +1,4 @@
+// data.js - 数据管理模块
 // 全局变量
 window.isEditMode = false;
 
@@ -34,11 +35,11 @@ const Data = {
         try {
             const savedSections = localStorage.getItem('sectionsData');
             if (savedSections) {
-                window.sectionsData = JSON.parse(savedSections);
+                let sectionsData = JSON.parse(savedSections);
                 
                 // 验证并修复数据结构
-                if (Array.isArray(window.sectionsData)) {
-                    window.sectionsData.forEach((section, index) => {
+                if (Array.isArray(sectionsData)) {
+                    sectionsData.forEach((section, index) => {
                         // 确保每个分组都有必需的属性
                         if (!section.id) section.id = `section-${Date.now()}-${index}`;
                         if (!section.title) section.title = '未命名分组';
@@ -54,16 +55,19 @@ const Data = {
                     });
                 } else {
                     // 如果数据结构不正确，使用默认数据
-                    window.sectionsData = JSON.parse(JSON.stringify(defaultSectionsData));
+                    sectionsData = JSON.parse(JSON.stringify(defaultSectionsData));
                 }
+                
+                // 更新状态管理器中的数据
+                stateManager.updateState({ sectionsData });
             } else {
                 // 如果localStorage中没有数据，则使用默认数据
-                window.sectionsData = JSON.parse(JSON.stringify(defaultSectionsData));
+                stateManager.updateState({ sectionsData: JSON.parse(JSON.stringify(defaultSectionsData)) });
             }
         } catch (e) {
-            console.error('加载分组数据时出错:', e);
+            ErrorHandler.handle(e, '加载分组数据');
             // 出错时使用默认数据
-            window.sectionsData = JSON.parse(JSON.stringify(defaultSectionsData));
+            stateManager.updateState({ sectionsData: JSON.parse(JSON.stringify(defaultSectionsData)) });
         }
         
         if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
@@ -74,9 +78,10 @@ const Data = {
     // 保存分组数据
     saveSectionsData() {
         try {
+            const sectionsData = DataAPI.getSections();
             // 在保存前验证数据结构
-            if (Array.isArray(window.sectionsData)) {
-                const validData = window.sectionsData.map(section => ({
+            if (Array.isArray(sectionsData)) {
+                const validData = sectionsData.map(section => ({
                     id: section.id || `section-${Date.now()}`,
                     title: section.title || '未命名分组',
                     backgroundColor: section.backgroundColor || '#444444',
@@ -91,7 +96,7 @@ const Data = {
                 localStorage.setItem('sectionsData', JSON.stringify(validData));
             }
         } catch (e) {
-            console.error('保存分组数据时出错:', e);
+            ErrorHandler.handle(e, '保存分组数据');
         }
     }
 };

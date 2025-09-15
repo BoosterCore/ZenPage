@@ -86,10 +86,12 @@ const Styles = {
         this.updateSectionLinkButtonStyle(sectionId, buttonColor);
         
         // 保存到全局数据
-        const sectionIndex = window.sectionsData.findIndex(s => s.id === sectionId);
+        const sectionsData = DataAPI.getSections();
+        const sectionIndex = sectionsData.findIndex(s => s.id === sectionId);
         if (sectionIndex !== -1) {
-            window.sectionsData[sectionIndex].backgroundColor = backgroundColor;
-            window.sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            sectionsData[sectionIndex].backgroundColor = backgroundColor;
+            sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            DataAPI.updateSections(sectionsData);
         }
     },
     

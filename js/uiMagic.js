@@ -259,8 +259,9 @@ const UIMagic = {
         }
         
         // 更新分组背景色（如果存在分组）
-        if (typeof window.sectionsData !== 'undefined' && window.sectionsData.length > 0) {
-            window.sectionsData.forEach((section, index) => {
+        const sectionsData = DataAPI.getSections();
+        if (sectionsData.length > 0) {
+            sectionsData.forEach((section, index) => {
                 // 循环使用颜色方案中的颜色
                 const colorIndex = index % 3; // 使用前3个颜色
                 const colors = [colorScheme.sectionBg, colorScheme.accent1, colorScheme.linkButtonBg];
@@ -268,7 +269,8 @@ const UIMagic = {
                 section.linkButtonColor = Utils.lightenColor(colors[colorIndex], 20);
             });
             
-            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+            DataAPI.updateSections(sectionsData);
+            Data.saveSectionsData();
             
             // 重新渲染分组
             if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {

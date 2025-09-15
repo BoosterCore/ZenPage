@@ -1,4 +1,4 @@
-// UI交互模块
+// ui.js - UI交互模块
 const UI = {
     // 创建模态框背景遮罩
     createModalBackdrop() {
@@ -114,6 +114,35 @@ const UI = {
         if (fontColorValue) fontColorValue.textContent = fontColor;
     },
     
+    // 显示消息
+    showMessage(message, type = 'info') {
+        // 创建消息元素
+        const messageElement = document.createElement('div');
+        messageElement.className = `message-${type}`;
+        messageElement.textContent = message;
+        messageElement.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            color: white;
+            z-index: 10000;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            ${type === 'error' ? 'background-color: #ff4444;' : 'background-color: #44aa44;'}
+        `;
+        
+        document.body.appendChild(messageElement);
+        
+        // 3秒后自动移除
+        setTimeout(() => {
+            if (messageElement.parentNode) {
+                messageElement.parentNode.removeChild(messageElement);
+            }
+        }, 3000);
+    },
+    
     // 初始化设置面板事件
     initSettingsPanel() {
         // 页面标题设置
@@ -123,7 +152,7 @@ const UI = {
                 const pageTitle = document.getElementById('pageTitle');
                 if (pageTitle) {
                     pageTitle.innerText = this.value;
-                    localStorage.setItem('pageTitle', this.value);
+                    DataAPI.setPageTitle(this.value);
                 }
             });
         }
@@ -132,7 +161,7 @@ const UI = {
         document.addEventListener('click', (e) => {
             const pageTitle = document.getElementById('pageTitle');
             if (pageTitle && e.target === pageTitle) {
-                if (window.isEditMode) {
+                if (DataAPI.isEditMode()) {
                     const settingsModal = document.getElementById('settingsModal');
                     if (settingsModal && typeof UI !== 'undefined' && typeof UI.showBodyBlur === 'function') {
                         settingsModal.style.display = 'block';
@@ -333,7 +362,7 @@ const UI = {
                         applyColorSchemeBtn.style.width = '100%';
                         
                     } catch (error) {
-                        console.error('图片处理错误:', error);
+                        ErrorHandler.handle(error, '图片处理');
                         colorPalette.innerHTML = '<div style="color:#ff6666;text-align:center;padding:10px;">颜色分析失败，请重试</div>';
                         applyColorSchemeBtn.style.display = 'none';
                     }
@@ -415,9 +444,10 @@ const UI = {
         
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
-                window.isEditMode = !window.isEditMode;
+                const isEditMode = !DataAPI.isEditMode();
+                DataAPI.setEditMode(isEditMode);
                 
-                if (window.isEditMode) {
+                if (isEditMode) {
                     // 进入编辑模式
                     toggleBtn.textContent = '退出编辑';
                     toggleBtn.classList.add('edit-mode');
@@ -477,7 +507,7 @@ const UI = {
                     pageBgColor: document.body.style.backgroundColor || '#333333',
                     pageBgGradient: document.body.style.background || localStorage.getItem('pageBgGradient'),
                     gradientAngle: localStorage.getItem('gradientAngle') || '90',
-                    sectionsData: typeof window.sectionsData !== 'undefined' ? window.sectionsData : []
+                    sectionsData: DataAPI.getSections()
                 };
                 
                 // 创建下载链接
@@ -520,7 +550,7 @@ const UI = {
                         if (configData.pageTitle && pageTitle && pageTitleInput) {
                             pageTitle.innerText = configData.pageTitle;
                             pageTitleInput.value = configData.pageTitle;
-                            localStorage.setItem('pageTitle', configData.pageTitle);
+                            DataAPI.setPageTitle(configData.pageTitle);
                         }
                         
                         const fontFamily = document.getElementById('fontFamily');
@@ -578,10 +608,10 @@ const UI = {
                             localStorage.setItem('gradientAngle', angle);
                         }
                         
-                        if (configData.sectionsData && typeof window.sectionsData !== 'undefined') {
-                            window.sectionsData = configData.sectionsData;
+                        if (configData.sectionsData) {
+                            stateManager.updateState({ sectionsData: configData.sectionsData });
                             // 保存数据
-                            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                            Data.saveSectionsData();
                             // 重新渲染
                             if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                                 Renderer.renderSections();
@@ -596,7 +626,7 @@ const UI = {
                         
                         alert('配置导入成功！');
                     } catch (error) {
-                        console.error('导入配置时出错:', error);
+                        ErrorHandler.handle(error, '导入配置');
                         alert('配置文件格式错误，请选择有效的配置文件。');
                         importConfigInput.value = '';
                     }
@@ -724,7 +754,8 @@ const UI = {
                 modal.dataset.sectionId = sectionData.id;
                 
                 // 显示删除按钮（如果不是最后一个分组）
-                deleteBtn.style.display = typeof window.sectionsData !== 'undefined' && window.sectionsData.length > 1 ? 'block' : 'none';
+                const sectionsData = DataAPI.getSections();
+                deleteBtn.style.display = sectionsData.length > 1 ? 'block' : 'none';
             } else if (modal && titleInput && colorInputUpdated && deleteBtn && modalTitle && submitBtn) {
                 // 添加模式
                 modalTitle.textContent = '添加分组';
@@ -796,9 +827,6 @@ const UI = {
         }
     }
 };
-
-// 全局编辑模式变量
-window.isEditMode = false;
 
 // 显示自定义确认对话框
 UI.showConfirmModal = function(message, onConfirm, onCancel) {

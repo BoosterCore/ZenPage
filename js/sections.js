@@ -1,15 +1,15 @@
-// 分组管理模块
+// sections.js - 分组管理模块
 // 注意：不再在这里声明 sectionsData，而是在 app.js 中初始化
 
 // 初始化分组数据的函数
 function initSectionsData() {
     try {
-        if (typeof window.sectionsData === 'undefined') {
+        if (DataAPI.getSections().length === 0) {
             const savedData = localStorage.getItem('sectionsData');
             if (savedData) {
-                window.sectionsData = JSON.parse(savedData);
+                stateManager.updateState({ sectionsData: JSON.parse(savedData) });
             } else {
-                window.sectionsData = [
+                stateManager.updateState({ sectionsData: [
                     {
                         id: 'section1',
                         title: '常用网站',
@@ -22,34 +22,35 @@ function initSectionsData() {
                         backgroundColor: '#555555',
                         links: []
                     }
-                ];
+                ]});
             }
         }
     } catch (error) {
-        console.error('初始化分组数据时出错，使用默认数据:', error);
-        window.sectionsData = [
+        ErrorHandler.handle(error, '初始化分组数据');
+        stateManager.updateState({ sectionsData: [
             {
                 id: 'section1',
                 title: '常用网站',
                 backgroundColor: '#444444',
                 links: []
             }
-        ];
+        ]});
     }
 }
 
 const Sections = {
     // 添加新分组
     addSection() {
+        const sectionsData = DataAPI.getSections();
         const newSection = {
-            id: 'section' + (window.sectionsData.length + 1),
+            id: 'section' + (sectionsData.length + 1),
             title: '新分组',
             backgroundColor: '#444444',
             links: []
         };
         
-        window.sectionsData.push(newSection);
-        localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+        DataAPI.addSection(newSection);
+        Data.saveSectionsData();
         if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
             Renderer.renderSections();
         }
@@ -57,7 +58,8 @@ const Sections = {
     
     // 删除分组
     deleteSection(sectionId) {
-        if (window.sectionsData.length <= 1) {
+        const sectionsData = DataAPI.getSections();
+        if (sectionsData.length <= 1) {
             alert('至少需要保留一个分组！');
             return;
         }
@@ -66,8 +68,8 @@ const Sections = {
         if (typeof UI !== 'undefined' && typeof UI.showConfirmModal === 'function') {
             UI.showConfirmModal('确定要删除这个分组吗？分组内的所有链接都将丢失！', function() {
                 // 用户点击确定
-                window.sectionsData = window.sectionsData.filter(section => section.id !== sectionId);
-                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                DataAPI.deleteSection(sectionId);
+                Data.saveSectionsData();
                 if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                     Renderer.renderSections();
                 }
@@ -80,31 +82,27 @@ const Sections = {
     
     // 更新分组标题
     updateSectionTitle(sectionId, newTitle) {
-        const section = window.sectionsData.find(s => s.id === sectionId);
-        if (section) {
-            section.title = newTitle;
-            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
-        }
+        DataAPI.updateSection(sectionId, { title: newTitle });
+        Data.saveSectionsData();
     },
     
     // 更新分组背景色
     updateSectionBackgroundColor(sectionId, newColor) {
-        const section = window.sectionsData.find(s => s.id === sectionId);
-        if (section) {
-            section.backgroundColor = newColor;
-            // 计算并保存按钮颜色
-            section.linkButtonColor = Utils.lightenColor(newColor, 20);
-            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+        const linkButtonColor = Utils.lightenColor(newColor, 20);
+        DataAPI.updateSection(sectionId, { 
+            backgroundColor: newColor,
+            linkButtonColor: linkButtonColor
+        });
+        Data.saveSectionsData();
+        
+        // 更新UI中的分组背景色
+        const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionId}"]`);
+        if (sectionElement) {
+            sectionElement.style.backgroundColor = Utils.convertToRGBA(newColor, 0.25);
             
-            // 更新UI中的分组背景色
-            const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionId}"]`);
-            if (sectionElement) {
-                sectionElement.style.backgroundColor = Utils.convertToRGBA(newColor, 0.25);
-                
-                // 更新该分组内链接按钮的样式
-                if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
-                    Styles.updateSectionLinkButtonStyle(sectionId, section.linkButtonColor);
-                }
+            // 更新该分组内链接按钮的样式
+            if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
+                Styles.updateSectionLinkButtonStyle(sectionId, linkButtonColor);
             }
         }
     },
@@ -126,15 +124,16 @@ const Sections = {
             Sections.updateSectionBackgroundColor(sectionId, colorInput.value);
         } else {
             // 添加新分组
+            const sectionsData = DataAPI.getSections();
             const newSection = {
-                id: 'section' + (window.sectionsData.length + 1),
+                id: 'section' + (sectionsData.length + 1),
                 title: titleInput.value,
                 backgroundColor: colorInput.value,
                 links: []
             };
             
-            window.sectionsData.push(newSection);
-            localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+            DataAPI.addSection(newSection);
+            Data.saveSectionsData();
         }
         
         if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
@@ -153,6 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 确保初始数据存在
     if (!localStorage.getItem('sectionsData')) {
-        localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+        Data.saveSectionsData();
     }
 });

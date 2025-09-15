@@ -1,4 +1,4 @@
-// 拖拽管理模块
+// dragdrop.js - 拖拽管理模块
 const DragDrop = {
     // 初始化拖拽和排序功能
     initDragAndDrop() {
@@ -79,11 +79,13 @@ const DragDrop = {
             
             if (srcIndex !== -1 && targetIndex !== -1) {
                 // 重新排列数据
-                const [movedSection] = window.sectionsData.splice(srcIndex, 1);
-                window.sectionsData.splice(targetIndex, 0, movedSection);
+                const sectionsData = DataAPI.getSections();
+                const [movedSection] = sectionsData.splice(srcIndex, 1);
+                sectionsData.splice(targetIndex, 0, movedSection);
                 
                 // 保存并重新渲染
-                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                DataAPI.updateSections(sectionsData);
+                Data.saveSectionsData();
                 if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                     Renderer.renderSections();
                 }

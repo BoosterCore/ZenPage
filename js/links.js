@@ -1,4 +1,4 @@
-// 链接管理模块
+// links.js - 链接管理模块
 const Links = {
     // 绑定编辑和删除事件
     bindEditDeleteEvents() {
@@ -11,7 +11,8 @@ const Links = {
                 const sectionId = sectionElement.dataset.sectionId;
                 
                 // 查找对应的链接数据
-                const section = window.sectionsData.find(s => s.id === sectionId);
+                const sectionsData = DataAPI.getSections();
+                const section = sectionsData.find(s => s.id === sectionId);
                 if (section) {
                     // 获取链接索引
                     const linkItems = Array.from(sectionElement.querySelectorAll('.link-item:not(:has(.add-link-placeholder))'));
@@ -40,14 +41,16 @@ const Links = {
                 if (typeof UI !== 'undefined' && typeof UI.showConfirmModal === 'function') {
                     UI.showConfirmModal('确定要删除这个链接吗？', function() {
                         // 用户点击确定
-                        const section = window.sectionsData.find(s => s.id === sectionId);
+                        const sectionsData = DataAPI.getSections();
+                        const section = sectionsData.find(s => s.id === sectionId);
                         if (section) {
                             // 获取链接索引
                             const linkItems = Array.from(sectionElement.querySelectorAll('.link-item:not(:has(.add-link-placeholder))'));
                             const linkIndex = linkItems.indexOf(linkItem);
                             if (linkIndex >= 0 && linkIndex < section.links.length) {
                                 section.links.splice(linkIndex, 1);
-                                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                                DataAPI.updateSections(sectionsData);
+                                Data.saveSectionsData();
                                 if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                                     Renderer.renderSections();
                                 }
@@ -76,10 +79,12 @@ const Links = {
                 const newTitle = this.textContent;
                 
                 // 更新分组标题
-                const section = window.sectionsData.find(s => s.id === sectionId);
+                const sectionsData = DataAPI.getSections();
+                const section = sectionsData.find(s => s.id === sectionId);
                 if (section) {
                     section.title = newTitle;
-                    localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                    DataAPI.updateSections(sectionsData);
+                    Data.saveSectionsData();
                 }
             });
         });
@@ -101,18 +106,21 @@ const Links = {
         if (isEditMode && linkId) {
             // 编辑现有链接
             const [secId, linkIndex] = linkId.split('-');
-            const section = window.sectionsData.find(s => s.id === secId);
+            const sectionsData = DataAPI.getSections();
+            const section = sectionsData.find(s => s.id === secId);
             if (section) {
                 section.links[parseInt(linkIndex)] = {
                     url: urlInput.value,
                     name: nameInput.value,
                     icon: iconInput.value
                 };
-                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                DataAPI.updateSections(sectionsData);
+                Data.saveSectionsData();
             }
         } else if (sectionId) {
             // 添加新链接
-            const section = window.sectionsData.find(s => s.id === sectionId);
+            const sectionsData = DataAPI.getSections();
+            const section = sectionsData.find(s => s.id === sectionId);
             if (section) {
                 section.links = section.links || [];
                 section.links.push({
@@ -120,7 +128,8 @@ const Links = {
                     name: nameInput.value,
                     icon: iconInput.value
                 });
-                localStorage.setItem('sectionsData', JSON.stringify(window.sectionsData));
+                DataAPI.updateSections(sectionsData);
+                Data.saveSectionsData();
             }
         }
         

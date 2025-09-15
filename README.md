@@ -90,3 +90,6 @@ The project is developed using native HTML, CSS, and JavaScript with no external
 - [dragdrop.js] - 拖拽管理模块（Drag and drop management module）
 - [utils.js] - 工具函数模块（Utility functions module）
 - [uiMagic.js] - UI幻化功能模块（UI Magic feature module）
+- [eventBus.js] - 事件总线模块（Event bus module）
+- [stateManager.js] - 状态管理模块（State management module）
+- [dataAPI.js] - 数据API模块（Data API module）

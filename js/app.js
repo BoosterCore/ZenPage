@@ -1,17 +1,18 @@
-// 应用主入口文件
+// app.js - 应用主入口文件
 document.addEventListener('DOMContentLoaded', function() {
     // 延迟执行确保所有模块都已加载
     setTimeout(function() {
         try {
+            // 初始化状态管理器
+            stateManager.loadFromStorage();
+            
             // 恢复页面设置（包括背景色）
             try {
                 // 恢复页面标题
-                const savedTitle = localStorage.getItem('pageTitle');
-                if (savedTitle) {
-                    const pageTitle = document.getElementById('pageTitle');
-                    if (pageTitle) {
-                        pageTitle.textContent = savedTitle;
-                    }
+                const savedTitle = DataAPI.getPageTitle();
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle && savedTitle) {
+                    pageTitle.textContent = savedTitle;
                 }
                 
                 // 恢复页面背景
@@ -29,18 +30,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // 恢复标题样式
-                const pageTitle = document.getElementById('pageTitle');
-                if (pageTitle) {
+                const pageTitleElement = document.getElementById('pageTitle');
+                if (pageTitleElement) {
                     const savedFontFamily = localStorage.getItem('titleFontFamily');
                     const savedFontSize = localStorage.getItem('titleFontSize');
                     const savedFontColor = localStorage.getItem('titleFontColor');
                     
-                    if (savedFontFamily) pageTitle.style.fontFamily = savedFontFamily;
-                    if (savedFontSize) pageTitle.style.fontSize = savedFontSize + 'px';
-                    if (savedFontColor) pageTitle.style.color = savedFontColor;
+                    if (savedFontFamily) pageTitleElement.style.fontFamily = savedFontFamily;
+                    if (savedFontSize) pageTitleElement.style.fontSize = savedFontSize + 'px';
+                    if (savedFontColor) pageTitleElement.style.color = savedFontColor;
                 }
             } catch (e) {
-                console.error('恢复页面设置时出错:', e);
+                ErrorHandler.handle(e, '恢复页面设置');
             }
             
             // 初始化分组数据
@@ -76,8 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 ];
                 
                 // 确保window.sectionsData存在
-                if (typeof window.sectionsData === 'undefined' || !Array.isArray(window.sectionsData)) {
-                    window.sectionsData = defaultSectionsData;
+                if (DataAPI.getSections().length === 0) {
+                    stateManager.updateState({ sectionsData: defaultSectionsData });
                 }
                 
                 // 渲染分组
@@ -168,13 +169,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 DragDrop.initDragAndDrop();
             }
         } catch (error) {
-            console.error('应用初始化过程中发生错误:', error);
+            ErrorHandler.handle(error, '应用初始化');
         }
     }, 200); // 延迟200毫秒确保所有模块都已加载
-});
 
-// 确保页面标题可以点击以打开设置面板
-document.addEventListener('DOMContentLoaded', function() {
+    // 确保页面标题可以点击以打开设置面板
     setTimeout(function() {
         const pageTitle = document.getElementById('pageTitle');
         if (pageTitle) {

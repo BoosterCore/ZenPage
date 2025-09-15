@@ -1,4 +1,4 @@
-// 渲染模块
+// renderer.js - 渲染模块
 const Renderer = {
     // 渲染所有分组
     renderSections() {
@@ -11,18 +11,22 @@ const Renderer = {
             
             sectionsContainer.innerHTML = '';
             
-            // 确保window.sectionsData存在且为数组
-            if (!window.sectionsData || !Array.isArray(window.sectionsData)) {
+            // 获取分组数据
+            let sectionsData = DataAPI.getSections();
+            
+            // 确保sectionsData存在且为数组
+            if (!sectionsData || !Array.isArray(sectionsData)) {
                 console.warn('sectionsData不存在或不是数组，创建默认分组');
-                window.sectionsData = [{
+                sectionsData = [{
                     id: 'default-section',
                     title: '默认分组',
                     backgroundColor: '#444444',
                     links: []
                 }];
+                stateManager.updateState({ sectionsData });
             }
             
-            window.sectionsData.forEach((section, index) => {
+            sectionsData.forEach((section, index) => {
                 // 确保必需的属性存在
                 if (!section.id) section.id = 'section' + (index + 1);
                 if (!section.title) section.title = '新分组';
@@ -40,10 +44,10 @@ const Renderer = {
                 sectionElement.className = 'links-section';
                 sectionElement.dataset.sectionId = section.id;
                 sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
-                sectionElement.setAttribute('draggable', window.isEditMode);
+                sectionElement.setAttribute('draggable', DataAPI.isEditMode());
                 
                 sectionElement.innerHTML = `
-                    <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
+                    <div class="section-header ${DataAPI.isEditMode() ? 'drag-handle' : ''}">
                         <h2 class="section-title" contenteditable="false">${section.title}</h2>
                     </div>
                     <div class="links-grid" id="linksContainer-${section.id}">
@@ -60,7 +64,8 @@ const Renderer = {
                 let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
                 // 保存计算出的颜色
                 if (!section.linkButtonColor) {
-                    window.sectionsData[index].linkButtonColor = buttonColor;
+                    sectionsData[index].linkButtonColor = buttonColor;
+                    DataAPI.updateSections(sectionsData);
                 }
                 if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
                     Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
@@ -70,7 +75,7 @@ const Renderer = {
             // 根据编辑模式更新UI
             this.updateEditModeUI();
         } catch (error) {
-            console.error('渲染分组时出错:', error);
+            ErrorHandler.handle(error, '渲染分组');
             // 显示错误信息
             const sectionsContainer = document.getElementById('sectionsContainer');
             if (sectionsContainer) {
@@ -89,7 +94,7 @@ const Renderer = {
         const headerControls = document.querySelector('.header-controls');
         const sectionHeaders = document.querySelectorAll('.section-header');
         
-        if (window.isEditMode) {
+        if (DataAPI.isEditMode()) {
             // 显示编辑模式按钮
             if (addSectionBtn) addSectionBtn.style.display = 'inline-block';
             if (importConfigBtn) importConfigBtn.style.display = 'inline-block';
@@ -101,17 +106,21 @@ const Renderer = {
             
             // 添加编辑模式类名
             if (headerControls) headerControls.classList.add('editing');
-            sectionHeaders.forEach(header => header.classList.add('edit-mode'));
+            sectionHeaders.forEach(header => {
+                header.classList.add('edit-mode');
+                header.classList.add('drag-handle'); // 添加拖拽手柄类
+            });
             
             // 为所有分组标题添加点击事件（用于编辑分组样式）
             setTimeout(() => {
                 document.querySelectorAll('.section-title').forEach(title => {
                     title.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (window.isEditMode) {
+                        if (DataAPI.isEditMode()) {
                             const section = this.closest('.links-section');
                             const sectionId = section.dataset.sectionId;
-                            const sectionData = window.sectionsData.find(s => s.id === sectionId);
+                            const sectionsData = DataAPI.getSections();
+                            const sectionData = sectionsData.find(s => s.id === sectionId);
                             
                             if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
                                 UI.showSectionEditModal(sectionData);
@@ -149,7 +158,10 @@ const Renderer = {
             
             // 移除编辑模式类名
             if (headerControls) headerControls.classList.remove('editing');
-            sectionHeaders.forEach(header => header.classList.remove('edit-mode'));
+            sectionHeaders.forEach(header => {
+                header.classList.remove('edit-mode');
+                header.classList.remove('drag-handle'); // 移除拖拽手柄类
+            });
             
             // 移除编辑覆盖层
             if (typeof UI !== 'undefined' && typeof UI.removeEditOverlays === 'function') {
@@ -173,7 +185,7 @@ const Renderer = {
         links.forEach(link => {
             const linkItem = document.createElement('div');
             linkItem.className = 'link-item';
-            if (window.isEditMode) {
+            if (DataAPI.isEditMode()) {
                 linkItem.classList.add('edit-mode');
             }
             linkItem.dataset.linkId = link.id;
@@ -199,7 +211,7 @@ const Renderer = {
         });
         
         // 如果在编辑模式下，添加"添加链接"的占位符按钮
-        if (window.isEditMode) {
+        if (DataAPI.isEditMode()) {
             const addLinkPlaceholder = document.createElement('div');
             addLinkPlaceholder.className = 'link-item';
             addLinkPlaceholder.innerHTML = `
@@ -227,7 +239,7 @@ const Renderer = {
         }
         
         // 如果在编辑模式下，添加编辑覆盖层
-        if (window.isEditMode) {
+        if (DataAPI.isEditMode()) {
             // 为真实链接项添加编辑覆盖层（排除添加链接按钮）
             setTimeout(() => {
                 document.querySelectorAll(`#linksContainer-${sectionId} .link-item`).forEach(item => {
@@ -267,7 +279,8 @@ const Renderer = {
     
     // 局部更新特定分组
     updateSection(sectionId) {
-        const section = window.sectionsData.find(s => s.id === sectionId);
+        const sectionsData = DataAPI.getSections();
+        const section = sectionsData.find(s => s.id === sectionId);
         if (!section) return;
         
         const sectionElement = document.querySelector(`.links-section[data-section-id="${sectionId}"]`);
@@ -292,16 +305,17 @@ const Renderer = {
         // 更新链接按钮样式
         let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
         // 保存计算出的颜色
-        const sectionIndex = window.sectionsData.findIndex(s => s.id === sectionId);
+        const sectionIndex = sectionsData.findIndex(s => s.id === sectionId);
         if (sectionIndex !== -1 && !section.linkButtonColor) {
-            window.sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            DataAPI.updateSections(sectionsData);
         }
         if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
             Styles.updateSectionLinkButtonStyle(sectionId, buttonColor);
         }
         
         // 如果在编辑模式下，重新绑定事件
-        if (window.isEditMode) {
+        if (DataAPI.isEditMode()) {
             setTimeout(() => {
                 if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
                     Links.bindEditDeleteEvents();
@@ -311,8 +325,9 @@ const Renderer = {
                 if (titleElement) {
                     titleElement.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (window.isEditMode) {
-                            const sectionData = window.sectionsData.find(s => s.id === sectionId);
+                        if (DataAPI.isEditMode()) {
+                            const sectionsData = DataAPI.getSections();
+                            const sectionData = sectionsData.find(s => s.id === sectionId);
                             if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
                                 UI.showSectionEditModal(sectionData);
                             }
@@ -337,10 +352,10 @@ const Renderer = {
         sectionElement.className = 'links-section';
         sectionElement.dataset.sectionId = section.id;
         sectionElement.style.backgroundColor = section.backgroundColor;
-        sectionElement.setAttribute('draggable', window.isEditMode);
+        sectionElement.setAttribute('draggable', DataAPI.isEditMode());
         
         sectionElement.innerHTML = `
-            <div class="section-header ${window.isEditMode ? 'drag-handle' : ''}">
+            <div class="section-header ${DataAPI.isEditMode() ? 'drag-handle' : ''}">
                 <h2 class="section-title" contenteditable="false">${section.title}</h2>
             </div>
             <div class="links-grid" id="linksContainer-${section.id}">
@@ -356,16 +371,18 @@ const Renderer = {
         // 应用链接按钮颜色
         let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);
         // 保存计算出的颜色
-        const sectionIndex = window.sectionsData.findIndex(s => s.id === section.id);
+        const sectionsData = DataAPI.getSections();
+        const sectionIndex = sectionsData.findIndex(s => s.id === section.id);
         if (sectionIndex !== -1 && !section.linkButtonColor) {
-            window.sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            sectionsData[sectionIndex].linkButtonColor = buttonColor;
+            DataAPI.updateSections(sectionsData);
         }
         if (typeof Styles !== 'undefined' && typeof Styles.updateSectionLinkButtonStyle === 'function') {
             Styles.updateSectionLinkButtonStyle(section.id, buttonColor);
         }
         
         // 如果在编辑模式下，绑定事件
-        if (window.isEditMode) {
+        if (DataAPI.isEditMode()) {
             setTimeout(() => {
                 if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
                     Links.bindEditDeleteEvents();
@@ -379,7 +396,7 @@ const Renderer = {
                 if (titleElement) {
                     titleElement.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        if (window.isEditMode) {
+                        if (DataAPI.isEditMode()) {
                             if (typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
                                 UI.showSectionEditModal(section);
                             }

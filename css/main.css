@@ -1,8 +1,3 @@
-:root {
-    --link-hover-color: #666666;
-    --extra-accent-color: #888888;
-}
-
 /* 链接按钮悬停效果 */
 .link-button:hover {
     transform: translateY(-2px);
@@ -138,9 +133,9 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
-    cursor: move;
 }
 
+/* 只在编辑模式下显示拖拽光标 */
 .section-header.drag-handle {
     cursor: move;
 }
