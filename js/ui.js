@@ -254,14 +254,26 @@ const UI = {
         
         // UI幻化功能 - 图片上传处理
         const imageUpload = document.getElementById('imageUpload');
+        const imageUploadButton = document.getElementById('imageUploadButton'); // 新增这行
         const colorPalettePreview = document.getElementById('colorPalettePreview');
         const colorPalette = document.getElementById('colorPalette');
         const applyColorSchemeBtn = document.getElementById('applyColorScheme');
 
-        if (imageUpload && colorPalettePreview && colorPalette && applyColorSchemeBtn) {
+        if (imageUpload && imageUploadButton && colorPalettePreview && colorPalette && applyColorSchemeBtn) {
+            // 点击按钮时触发文件选择
+            imageUploadButton.addEventListener('click', function() {
+                imageUpload.click();
+            });
+            
+            // 文件选择改变时的处理
             imageUpload.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
+                
+                // 更新按钮文本显示选中的文件名
+                imageUploadButton.textContent = file.name.length > 20 
+                    ? file.name.substring(0, 17) + '...' 
+                    : file.name;
                 
                 const reader = new FileReader();
                 reader.onload = async function(e) {
@@ -343,6 +355,10 @@ const UI = {
                     setTimeout(() => {
                         this.textContent = originalText;
                         this.style.background = '';
+                        // 重置按钮文本
+                        imageUploadButton.textContent = '选择图片';
+                        // 清空文件输入
+                        imageUpload.value = '';
                     }, 2000);
                 }
             });

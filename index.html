@@ -96,7 +96,10 @@
 
                 <div class="setting-group">
                     <label for="imageUpload">UI幻化 (上传图片自动生成配色):</label>
-                    <input type="file" id="imageUpload" accept="image/*" class="glass-input">
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="imageUpload" accept="image/*" class="glass-file-input">
+                        <button type="button" id="imageUploadButton" class="glass-button secondary">选择图片</button>
+                    </div>
                     <div class="ui-magic-preview" id="colorPalettePreview" style="display: none; margin-top: 10px;">
                         <div class="color-palette-container">
                             <div class="palette-title">提取的颜色：</div>

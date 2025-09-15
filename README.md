@@ -27,6 +27,9 @@ This is an experimental project created by a designer who doesn't know programmi
 - **响应式设计**：适配各种屏幕尺寸  
   **Responsive Design**: Adapts to various screen sizes
 
+- **UI幻化**：通过上传图片自动提取配色方案并应用到页面  
+  **UI Magic**: Automatically extract color schemes from uploaded images and apply them to the page
+
 ## 使用方法 (Usage)
 
 1. 打开 index.html 文件即可使用  
@@ -52,6 +55,17 @@ This is an experimental project created by a designer who doesn't know programmi
 5. 使用导入/导出功能备份和恢复配置  
    Use import/export functions to backup and restore configurations
 
+6. 使用UI幻化功能自动配色  
+   Use UI Magic feature for automatic color scheme generation:
+   - 在页面设置中找到"UI幻化"部分  
+     Find the "UI Magic" section in page settings
+   - 上传一张图片  
+     Upload an image
+   - 系统将自动分析图片并提取主要颜色  
+     The system will automatically analyze the image and extract main colors
+   - 点击"应用配色方案"按钮应用提取的配色  
+     Click the "Apply Color Scheme" button to apply the extracted colors
+
 ## 技术架构 (Technical Architecture)
 
 项目采用原生HTML、CSS、JavaScript开发，无外部依赖。
@@ -61,17 +75,18 @@ The project is developed using native HTML, CSS, and JavaScript with no external
 ## 文件说明 (File Descriptions)
 
 ### CSS文件 (CSS Files)
-- `main.css` - 主要样式（Main styles）
-- `modals.css` - 模态框样式（Modal styles）
-- `responsive.css` - 响应式样式（Responsive styles）
+- [main.css] - 主要样式（Main styles）
+- [modals.css] - 模态框样式（Modal styles）
+- [responsive.css] - 响应式样式（Responsive styles）
 
 ### JavaScript文件 (JavaScript Files)
-- `app.js` - 应用主入口（Application entry point）
-- `data.js` - 数据管理模块（Data management module）
-- `renderer.js` - 渲染模块（Rendering module）
-- `ui.js` - UI交互模块（UI interaction module）
-- `styles.js` - 样式管理模块（Style management module）
-- `links.js` - 链接管理模块（Link management module）
-- `sections.js` - 分组管理模块（Group management module）
-- `dragdrop.js` - 拖拽管理模块（Drag and drop management module）
-- `utils.js` - 工具函数模块（Utility functions module）
+- [app.js] - 应用主入口（Application entry point）
+- [data.js] - 数据管理模块（Data management module）
+- [renderer.js] - 渲染模块（Rendering module）
+- [ui.js] - UI交互模块（UI interaction module）
+- [styles.js] - 样式管理模块（Style management module）
+- [links.js] - 链接管理模块（Link management module）
+- [sections.js] - 分组管理模块（Group management module）
+- [dragdrop.js] - 拖拽管理模块（Drag and drop management module）
+- [utils.js] - 工具函数模块（Utility functions module）
+- [uiMagic.js] - UI幻化功能模块（UI Magic feature module）
