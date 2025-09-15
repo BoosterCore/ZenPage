@@ -109,5 +109,52 @@ const Styles = {
         }
         
         return color;
+    },
+    
+    // 更新链接按钮悬停效果
+    updateLinkButtonHoverEffect(sectionId) {
+        const linksContainer = document.getElementById(`linksContainer-${sectionId}`);
+        if (!linksContainer) return;
+        
+        // 获取该分组的所有链接按钮
+        const linkButtons = linksContainer.querySelectorAll('.link-button');
+        linkButtons.forEach(button => {
+            // 为每个按钮存储原始背景色
+            const originalBg = button.style.backgroundColor;
+            button._originalBg = originalBg;
+            
+            // 添加悬停事件
+            button.addEventListener('mouseenter', function() {
+                // 获取当前背景色
+                const currentBg = this._originalBg || this.style.backgroundColor;
+                
+                // 如果是 rgba 格式，提取 RGB 值并生成更亮的颜色
+                if (currentBg && currentBg.startsWith('rgba')) {
+                    const match = currentBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                    if (match) {
+                        const r = parseInt(match[1]);
+                        const g = parseInt(match[2]);
+                        const b = parseInt(match[3]);
+                        
+                        // 生成更亮的颜色（增加亮度30%）
+                        const lighterR = Math.min(255, r + Math.round((255 - r) * 0.3));
+                        const lighterG = Math.min(255, g + Math.round((255 - g) * 0.3));
+                        const lighterB = Math.min(255, b + Math.round((255 - b) * 0.3));
+                        
+                        // 应用更亮的背景色和悬停效果
+                        this.style.backgroundColor = `rgb(${lighterR}, ${lighterG}, ${lighterB})`;
+                        this.style.transform = 'translateY(-5px)';
+                        this.style.boxShadow = '0 7px 15px rgba(0, 0, 0, 0.3)';
+                    }
+                }
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                // 恢复原始样式
+                this.style.backgroundColor = this._originalBg || '';
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
     }
 };

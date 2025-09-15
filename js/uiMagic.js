@@ -280,5 +280,10 @@ const UIMagic = {
         if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
             UI.updateModalBackgroundColor();
         }
+        
+        // 同步更新页面设置面板中的颜色选择器
+        if (typeof UI !== 'undefined' && typeof UI.syncColorPickers === 'function') {
+            UI.syncColorPickers(colorScheme.mainBg, colorScheme.accent2);
+        }
     }
 };

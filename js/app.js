@@ -3,6 +3,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // 延迟执行确保所有模块都已加载
     setTimeout(function() {
         try {
+            // 恢复页面设置（包括背景色）
+            try {
+                // 恢复页面标题
+                const savedTitle = localStorage.getItem('pageTitle');
+                if (savedTitle) {
+                    const pageTitle = document.getElementById('pageTitle');
+                    if (pageTitle) {
+                        pageTitle.textContent = savedTitle;
+                    }
+                }
+                
+                // 恢复页面背景
+                const savedBgGradient = localStorage.getItem('pageBgGradient');
+                if (savedBgGradient) {
+                    document.body.style.background = savedBgGradient;
+                } else {
+                    // 如果没有保存的渐变，但有背景色，也恢复它
+                    const savedBgColor = localStorage.getItem('pageBgColor');
+                    if (savedBgColor) {
+                        const savedAngle = localStorage.getItem('gradientAngle') || '90';
+                        const gradient = Utils.generateGradientFromColor(savedBgColor, savedAngle);
+                        document.body.style.background = gradient;
+                    }
+                }
+                
+                // 恢复标题样式
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    const savedFontFamily = localStorage.getItem('titleFontFamily');
+                    const savedFontSize = localStorage.getItem('titleFontSize');
+                    const savedFontColor = localStorage.getItem('titleFontColor');
+                    
+                    if (savedFontFamily) pageTitle.style.fontFamily = savedFontFamily;
+                    if (savedFontSize) pageTitle.style.fontSize = savedFontSize + 'px';
+                    if (savedFontColor) pageTitle.style.color = savedFontColor;
+                }
+            } catch (e) {
+                console.error('恢复页面设置时出错:', e);
+            }
+            
             // 初始化分组数据
             if (typeof Data !== 'undefined' && typeof Data.loadSectionsData === 'function') {
                 Data.loadSectionsData();

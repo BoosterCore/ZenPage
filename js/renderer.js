@@ -256,6 +256,13 @@ const Renderer = {
                 }, 10);
             }, 50);
         }
+        
+        // 应用悬停效果
+        if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
+            setTimeout(() => {
+                Styles.updateLinkButtonHoverEffect(sectionId);
+            }, 100);
+        }
     },
     
     // 局部更新特定分组
@@ -313,6 +320,13 @@ const Renderer = {
                     });
                 }
             }, 10);
+        }
+        
+        // 应用悬停效果
+        if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
+            setTimeout(() => {
+                Styles.updateLinkButtonHoverEffect(sectionId);
+            }, 100);
         }
     },
     
@@ -373,6 +387,13 @@ const Renderer = {
                     });
                 }
             }, 10);
+        }
+        
+        // 应用悬停效果
+        if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
+            setTimeout(() => {
+                Styles.updateLinkButtonHoverEffect(section.id);
+            }, 100);
         }
     },
     

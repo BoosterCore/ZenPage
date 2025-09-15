@@ -93,6 +93,27 @@ const UI = {
         `;
     },
     
+    // 同步颜色选择器的值
+    syncColorPickers(pageBgColor, fontColor) {
+        // 更新页面底色选择器
+        const pageBgColorPicker = document.getElementById('pageBgColor');
+        const pageBgColorPreview = document.getElementById('pageBgColorPreview');
+        const pageBgColorValue = document.getElementById('pageBgColorValue');
+        
+        if (pageBgColorPicker) pageBgColorPicker.value = pageBgColor;
+        if (pageBgColorPreview) pageBgColorPreview.style.backgroundColor = pageBgColor;
+        if (pageBgColorValue) pageBgColorValue.textContent = pageBgColor;
+        
+        // 更新标题颜色选择器
+        const fontColorPicker = document.getElementById('fontColor');
+        const fontColorPreview = document.getElementById('fontColorPreview');
+        const fontColorValue = document.getElementById('fontColorValue');
+        
+        if (fontColorPicker) fontColorPicker.value = fontColor;
+        if (fontColorPreview) fontColorPreview.style.backgroundColor = fontColor;
+        if (fontColorValue) fontColorValue.textContent = fontColor;
+    },
+    
     // 初始化设置面板事件
     initSettingsPanel() {
         // 页面标题设置
