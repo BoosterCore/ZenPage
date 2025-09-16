@@ -14,15 +14,57 @@ const Renderer = {
             // 获取分组数据
             let sectionsData = DataAPI.getSections();
             
-            // 确保sectionsData存在且为数组
-            if (!sectionsData || !Array.isArray(sectionsData)) {
-                console.warn('sectionsData不存在或不是数组，创建默认分组');
-                sectionsData = [{
-                    id: 'default-section',
-                    title: '默认分组',
-                    backgroundColor: '#444444',
-                    links: []
-                }];
+            // 如果没有数据，使用默认数据
+            if (!sectionsData || !Array.isArray(sectionsData) || sectionsData.length === 0) {
+                console.warn('sectionsData不存在或为空，加载默认数据');
+                const dataModule = typeof Data !== 'undefined' ? Data : { getDefaultSectionsData: () => [
+                    {
+                        id: 'search-engines',
+                        title: '搜索引擎',
+                        backgroundColor: '#444444',
+                        links: [
+                            { id: 'link1', url: 'https://www.google.com', name: 'Google', icon: '🔍' },
+                            { id: 'link2', url: 'https://www.bing.com', name: 'Bing', icon: '🔍' },
+                            { id: 'link3', url: 'https://www.yahoo.com', name: 'Yahoo', icon: '🔍' },
+                            { id: 'link4', url: 'https://www.sogou.com', name: '搜狗', icon: '🔍' },
+                            { id: 'link5', url: 'https://www.baidu.com', name: '百度', icon: '🔍' }
+                        ]
+                    },
+                    {
+                        id: 'shopping',
+                        title: '购物商城',
+                        backgroundColor: '#555555',
+                        links: [
+                            { id: 'link6', url: 'https://www.amazon.com', name: '亚马逊', icon: '🛒' },
+                            { id: 'link7', url: 'https://www.jd.com', name: '京东', icon: '🛒' },
+                            { id: 'link8', url: 'https://www.taobao.com', name: '淘宝', icon: '🛒' },
+                            { id: 'link9', url: 'https://www.tmall.com', name: '天猫', icon: '🛒' },
+                            { id: 'link10', url: 'https://www.goofish.com', name: '闲鱼', icon: '🐟' }
+                        ]
+                    },
+                    {
+                        id: 'videos',
+                        title: '精彩视频',
+                        backgroundColor: '#666666',
+                        links: [
+                            { id: 'link11', url: 'https://www.youtube.com', name: 'Youtube', icon: '▶️' },
+                            { id: 'link12', url: 'https://www.bilibili.com', name: 'Bilibili', icon: '📺' },
+                            { id: 'link13', url: 'https://www.youku.com', name: '优酷', icon: '🎬' },
+                            { id: 'link15', url: 'https://www.iqiyi.com', name: '爱奇艺', icon: '🥝' },
+                            { id: 'link16', url: 'https://v.qq.com', name: '腾讯视频', icon: '🐧' },
+                            { id: 'link18', url: 'https://www.miguvideo.com', name: '咪咕视频', icon: '🎵' },
+                            { id: 'link19', url: 'https://www.dailymotion.com', name: 'Daily motion', icon: '🎥' },
+                            { id: 'link20', url: 'https://vimeo.com', name: 'Vimeo', icon: '🎞️' },
+                            { id: 'link21', url: 'https://www.netflix.com', name: 'Netflix', icon: '🔴' },
+                            { id: 'link22', url: 'https://www.disneyplus.com', name: 'Disney', icon: '🐭' },
+                            { id: 'link23', url: 'https://www.hulu.com', name: 'Hulu', icon: ' Hulu' },
+                            { id: 'link24', url: 'https://www.hbo.com', name: 'HBO', icon: ' H' },
+                            { id: 'link26', url: 'https://www.twitch.tv', name: 'Twitch', icon: '⚡' },
+                            { id: 'link27', url: 'https://www.ign.com', name: 'IGN', icon: '🔥' }
+                        ]
+                    }
+                ]};
+                sectionsData = dataModule.getDefaultSectionsData();
                 stateManager.updateState({ sectionsData });
             }
             
@@ -182,23 +224,28 @@ const Renderer = {
         
         linksContainer.innerHTML = '';
         
+        // 确保links是一个数组
+        if (!Array.isArray(links)) {
+            links = [];
+        }
+        
         links.forEach(link => {
             const linkItem = document.createElement('div');
             linkItem.className = 'link-item';
             if (DataAPI.isEditMode()) {
                 linkItem.classList.add('edit-mode');
             }
-            linkItem.dataset.linkId = link.id;
+            linkItem.dataset.linkId = link.id || `link-${Date.now()}`;
             
             // 使用网站图标或默认emoji
             const faviconUrl = Utils.getFaviconUrl(link.url);
             
             linkItem.innerHTML = `
-                <a href="${link.url}" class="link-button" target="_blank">
+                <a href="${link.url || '#'}" class="link-button" target="_blank">
                     <div class="link-icon" data-favicon-url="${faviconUrl || ''}">
                         ${link.icon || '❓'}
                     </div>
-                    <div class="link-name">${link.name}</div>
+                    <div class="link-name">${link.name || '未命名链接'}</div>
                 </a>
             `;
             
@@ -297,7 +344,7 @@ const Renderer = {
         }
         
         // 更新分组背景色
-        sectionElement.style.backgroundColor = section.backgroundColor;
+        sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
         
         // 重新渲染该分组的链接
         this.renderLinksForSection(sectionId, section.links);
@@ -351,7 +398,7 @@ const Renderer = {
         const sectionElement = document.createElement('div');
         sectionElement.className = 'links-section';
         sectionElement.dataset.sectionId = section.id;
-        sectionElement.style.backgroundColor = section.backgroundColor;
+        sectionElement.style.backgroundColor = Utils.convertToRGBA(section.backgroundColor, 0.25);
         sectionElement.setAttribute('draggable', DataAPI.isEditMode());
         
         sectionElement.innerHTML = `
@@ -366,7 +413,7 @@ const Renderer = {
         sectionsContainer.appendChild(sectionElement);
         
         // 渲染该分组的链接
-        this.renderLinksForSection(section.id, section.links);
+        this.renderLinksForSection(section.id, section.links || []);
         
         // 应用链接按钮颜色
         let buttonColor = section.linkButtonColor || Utils.lightenColor(section.backgroundColor, 20);

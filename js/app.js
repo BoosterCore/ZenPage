@@ -1,4 +1,4 @@
-// app.js - 应用主入口文件
+// app.js - 应用主入口文件 (部分修改)
 document.addEventListener('DOMContentLoaded', function() {
     // 延迟执行确保所有模块都已加载
     setTimeout(function() {
@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (savedFontColor) pageTitleElement.style.color = savedFontColor;
                 }
             } catch (e) {
-                ErrorHandler.handle(e, '恢复页面设置');
+                // 直接使用 console.error 而不是 ErrorHandler
+                console.error('恢复页面设置时出错:', e);
             }
             
             // 初始化分组数据
@@ -66,12 +67,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     {
                         id: 'shopping',
-                        title: '购物',
+                        title: '购物商城',
                         backgroundColor: '#555555',
                         links: [
-                            { id: 'link6', url: 'https://www.jd.com', name: '京东', icon: '🛒' },
-                            { id: 'link7', url: 'https://www.taobao.com', name: '淘宝', icon: '🛍️' },
-                            { id: 'link8', url: 'https://www.goofish.com', name: '闲鱼', icon: '🐟' }
+                            { id: 'link6', url: 'https://www.amazon.com', name: '亚马逊', icon: '🛒' },
+                            { id: 'link7', url: 'https://www.jd.com', name: '京东', icon: '🛒' },
+                            { id: 'link8', url: 'https://www.taobao.com', name: '淘宝', icon: '🛒' },
+                            { id: 'link9', url: 'https://www.tmall.com', name: '天猫', icon: '🛒' },
+                            { id: 'link10', url: 'https://www.goofish.com', name: '闲鱼', icon: '🐟' }
                         ]
                     }
                 ];
@@ -168,8 +171,28 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
                 DragDrop.initDragAndDrop();
             }
+            
+            // 初始化可拖拽模态框
+            if (typeof UI !== 'undefined') {
+                // 确保设置模态框也可拖拽
+                const settingsModal = document.getElementById('settingsModal');
+                if (settingsModal) {
+                    // 为设置模态框添加打开事件监听器
+                    const pageTitle = document.getElementById('pageTitle');
+                    if (pageTitle) {
+                        pageTitle.addEventListener('click', function(e) {
+                            if (DataAPI.isEditMode()) {
+                                settingsModal.style.display = 'block';
+                                UI.showBodyBlur();
+                                UI.makeModalDraggable(settingsModal);
+                            }
+                        });
+                    }
+                }
+            }
         } catch (error) {
-            ErrorHandler.handle(error, '应用初始化');
+            // 直接使用 console.error 而不是 ErrorHandler
+            console.error('应用初始化时出错:', error);
         }
     }, 200); // 延迟200毫秒确保所有模块都已加载
 

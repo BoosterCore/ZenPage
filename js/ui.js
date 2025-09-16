@@ -166,6 +166,7 @@ const UI = {
                     if (settingsModal && typeof UI !== 'undefined' && typeof UI.showBodyBlur === 'function') {
                         settingsModal.style.display = 'block';
                         UI.showBodyBlur();
+                        UI.makeModalDraggable(settingsModal);
                     }
                 }
             }
@@ -712,6 +713,7 @@ const UI = {
         if (modal) {
             modal.style.display = 'block';
             this.showBodyBlur();
+            this.makeModalDraggable(modal);
         }
         
         // 确保模态框背景色与当前页面背景匹配
@@ -812,10 +814,80 @@ const UI = {
         if (modal) {
             modal.style.display = 'block';
             this.showBodyBlur();
+            this.makeModalDraggable(modal);
         }
         
         // 确保模态框背景色与当前页面背景匹配
         this.updateModalBackgroundColor();
+    },
+    
+    // 使模态框可拖拽
+    makeModalDraggable(modal) {
+        const header = modal.querySelector('.modal-header');
+        if (!header) return;
+        
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        // 设置模态框为可拖拽
+        modal.style.position = 'absolute';
+        modal.style.margin = '0';
+        modal.style.top = '10%';
+        modal.style.left = '50%';
+        modal.style.transform = 'translateX(-50%)';
+        
+        const startDrag = (e) => {
+            // 只有在标题栏上按下才开始拖拽
+            if (e.target.closest('.close')) return;
+            
+            isDragging = true;
+            startX = e.clientX || e.touches?.[0].clientX;
+            startY = e.clientY || e.touches?.[0].clientY;
+            
+            // 获取当前模态框位置
+            const rect = modal.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+            
+            // 添加拖拽时的样式
+            modal.style.cursor = 'grabbing';
+            document.body.style.userSelect = 'none';
+            document.body.style.pointerEvents = 'none';
+            modal.style.pointerEvents = 'auto';
+        };
+        
+        const drag = (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const clientX = e.clientX || e.touches?.[0].clientX;
+            const clientY = e.clientY || e.touches?.[0].clientY;
+            
+            const diffX = clientX - startX;
+            const diffY = clientY - startY;
+            
+            // 更新模态框位置
+            modal.style.left = (startLeft + diffX) + 'px';
+            modal.style.top = (startTop + diffY) + 'px';
+            modal.style.transform = 'none';
+        };
+        
+        const stopDrag = () => {
+            isDragging = false;
+            modal.style.cursor = 'default';
+            document.body.style.userSelect = '';
+            document.body.style.pointerEvents = '';
+        };
+        
+        // 添加事件监听器
+        header.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+        
+        // 移动端支持
+        header.addEventListener('touchstart', startDrag, { passive: false });
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
     },
     
     // 通用关闭模态框函数
@@ -864,6 +936,7 @@ UI.showConfirmModal = function(message, onConfirm, onCancel) {
     // 显示模态框
     confirmModal.style.display = 'block';
     UI.showBodyBlur();
+    UI.makeModalDraggable(confirmModal);
     
     // 获取关闭按钮
     const closeBtn = confirmModal.querySelector('.close');

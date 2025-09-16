@@ -1,3 +1,5 @@
+/* modals.css - 模态框样式 */
+
 /* 模态框头部 */
 .modal-header {
     display: flex;
@@ -5,6 +7,8 @@
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: move; /* 显示拖拽光标 */
+    user-select: none; /* 防止拖拽时选中文本 */
 }
 
 .modal-header h3 {
@@ -35,6 +39,7 @@
     cursor: pointer;
     transition: color 0.3s ease;
     z-index: 1003;
+    position: relative; /* 确保关闭按钮在最上层 */
 }
 
 .close:hover {
@@ -313,4 +318,31 @@
 .color-palette-item.active {
     transform: scale(1.1);
     box-shadow: 0 0 0 2px white, 0 0 5px rgba(255,255,255,0.8);
+}
+
+/* 模态框基础样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1002;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 模态框内容样式 */
+.modal-content {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    transform: translateX(-50%);
+    margin: 0;
+    background-color: rgba(100, 100, 100, 0.5);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    color: white;
+    position: absolute;
+    overflow: hidden;
 }
