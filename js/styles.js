@@ -125,6 +125,8 @@ const Styles = {
             // 使用带透明度的颜色
             const colorWithAlpha = Utils.convertToRGBA(buttonColor, 0.25);
             button.style.backgroundColor = colorWithAlpha;
+            // 同步更新原始背景色，确保悬停效果与新颜色匹配
+            button._originalBg = colorWithAlpha;
         });
         
         // 更新添加链接按钮的样式
@@ -183,42 +185,55 @@ const Styles = {
         // 获取该分组的所有链接按钮
         const linkButtons = linksContainer.querySelectorAll('.link-button');
         linkButtons.forEach(button => {
-            // 为每个按钮存储原始背景色
-            const originalBg = button.style.backgroundColor;
-            button._originalBg = originalBg;
+            // 为每个按钮存储原始背景色，只在不存在时设置，确保原始背景色不会被覆盖
+            if (!button._originalBg) {
+                button._originalBg = button.style.backgroundColor;
+            }
             
-            // 添加悬停事件
-            button.addEventListener('mouseenter', function() {
-                // 获取当前背景色
-                const currentBg = this._originalBg || this.style.backgroundColor;
-                
-                // 如果是 rgba 格式，提取 RGB 值并生成更亮的颜色
-                if (currentBg && currentBg.startsWith('rgba')) {
-                    const match = currentBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-                    if (match) {
-                        const r = parseInt(match[1]);
-                        const g = parseInt(match[2]);
-                        const b = parseInt(match[3]);
+            // 移除可能存在的旧事件监听器，避免重复绑定
+            // 先存储事件处理函数引用，以便后续可以移除
+            if (!button._hoverHandlers) {
+                button._hoverHandlers = {
+                    mouseenter: function() {
+                        // 确保始终使用最初存储的原始背景色，而不是当前可能已被修改的颜色
+                        const originalBg = this._originalBg;
                         
-                        // 生成更亮的颜色（增加亮度30%）
-                        const lighterR = Math.min(255, r + Math.round((255 - r) * 0.3));
-                        const lighterG = Math.min(255, g + Math.round((255 - g) * 0.3));
-                        const lighterB = Math.min(255, b + Math.round((255 - b) * 0.3));
-                        
-                        // 应用更亮的背景色和悬停效果
-                        this.style.backgroundColor = `rgb(${lighterR}, ${lighterG}, ${lighterB})`;
-                        this.style.transform = 'translateY(-5px)';
-                        this.style.boxShadow = '0 7px 15px rgba(0, 0, 0, 0.3)';
+                        // 如果是 rgba 格式，提取 RGB 值并生成更亮的颜色
+                        if (originalBg && originalBg.startsWith('rgba')) {
+                            const match = originalBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                            if (match) {
+                                const r = parseInt(match[1]);
+                                const g = parseInt(match[2]);
+                                const b = parseInt(match[3]);
+                                
+                                // 生成更亮的颜色（增加亮度30%）
+                                const lighterR = Math.min(255, r + Math.round((255 - r) * 0.3));
+                                const lighterG = Math.min(255, g + Math.round((255 - g) * 0.3));
+                                const lighterB = Math.min(255, b + Math.round((255 - b) * 0.3));
+                                
+                                // 应用更亮的背景色和悬停效果
+                                this.style.backgroundColor = `rgb(${lighterR}, ${lighterG}, ${lighterB})`;
+                                this.style.transform = 'translateY(-5px)';
+                                this.style.boxShadow = '0 7px 15px rgba(0, 0, 0, 0.3)';
+                            }
+                        }
+                    },
+                    mouseleave: function() {
+                        // 恢复原始样式
+                        this.style.backgroundColor = this._originalBg || '';
+                        this.style.transform = '';
+                        this.style.boxShadow = '';
                     }
-                }
-            });
+                };
+            }
             
-            button.addEventListener('mouseleave', function() {
-                // 恢复原始样式
-                this.style.backgroundColor = this._originalBg || '';
-                this.style.transform = '';
-                this.style.boxShadow = '';
-            });
+            // 移除旧事件监听器
+            button.removeEventListener('mouseenter', button._hoverHandlers.mouseenter);
+            button.removeEventListener('mouseleave', button._hoverHandlers.mouseleave);
+            
+            // 添加新事件监听器
+            button.addEventListener('mouseenter', button._hoverHandlers.mouseenter);
+            button.addEventListener('mouseleave', button._hoverHandlers.mouseleave);
         });
     }
 };

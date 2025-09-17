@@ -388,11 +388,33 @@
     top: 10%;
     transform: translateX(-50%);
     margin: 0;
-    background-color: rgba(100, 100, 100, 0.5);
+    /* 调整背景色和透明度，增强毛玻璃质感 */
+    background-color: rgba(100, 100, 100, 0.7);
     border-radius: 12px;
     width: 90%;
     max-width: 800px; /* 增加最大宽度以适应双列布局 */
     color: white;
     position: absolute;
     overflow: hidden;
+    /* 增强毛玻璃效果，增加模糊度模拟厚玻璃 */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    /* 添加复杂的多层次阴影，增强厚度感 */
+    box-shadow: 
+        /* 左侧和顶部高光 */
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        -5px -5px 15px rgba(255, 255, 255, 0.07),
+        /* 右侧和底部暗部阴影 - 增强厚度感的关键 */
+        8px 8px 25px rgba(0, 0, 0, 0.6),
+        3px 3px 10px rgba(0, 0, 0, 0.4),
+        /* 内部阴影模拟玻璃内部结构 */
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
+    /* 添加细微的渐变背景，增强光照效果 */
+    background-image: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(0, 0, 0, 0.05) 100%
+    );
 }

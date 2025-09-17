@@ -154,40 +154,34 @@ const Renderer = {
             });
             
             // 为所有分组标题添加点击事件（用于编辑分组样式）
-            setTimeout(() => {
-                document.querySelectorAll('.section-title').forEach(title => {
-                    title.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (DataAPI.isEditMode()) {
-                            const section = this.closest('.links-section');
-                            const sectionId = section.dataset.sectionId;
-                            const sectionsData = DataAPI.getSections();
-                            const sectionData = sectionsData.find(s => s.id === sectionId);
-                            
-                            if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
-                                UI.showSectionEditModal(sectionData);
-                            }
+            document.querySelectorAll('.section-title').forEach(title => {
+                title.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (DataAPI.isEditMode()) {
+                        const section = this.closest('.links-section');
+                        const sectionId = section.dataset.sectionId;
+                        const sectionsData = DataAPI.getSections();
+                        const sectionData = sectionsData.find(s => s.id === sectionId);
+                         
+                        if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
+                            UI.showSectionEditModal(sectionData);
                         }
-                    });
+                    }
                 });
-            }, 100);
+            });
             
             // 添加编辑覆盖层
-            setTimeout(() => {
-                if (typeof UI !== 'undefined' && typeof UI.addEditOverlays === 'function') {
-                    UI.addEditOverlays();
-                }
-                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
-                    Links.bindEditDeleteEvents();
-                }
-            }, 50);
+            if (typeof UI !== 'undefined' && typeof UI.addEditOverlays === 'function') {
+                UI.addEditOverlays();
+            }
+            if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                Links.bindEditDeleteEvents();
+            }
             
             // 初始化拖拽功能
-            setTimeout(() => {
-                if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
-                    DragDrop.initDragAndDrop();
-                }
-            }, 100);
+            if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
+                DragDrop.initDragAndDrop();
+            }
         } else {
             // 隐藏编辑模式按钮
             if (addSectionBtn) addSectionBtn.style.display = 'none';
@@ -286,14 +280,13 @@ const Renderer = {
         }
         
         // 如果在编辑模式下，添加编辑覆盖层
-        if (DataAPI.isEditMode()) {
-            // 为真实链接项添加编辑覆盖层（排除添加链接按钮）
-            setTimeout(() => {
+            if (DataAPI.isEditMode()) {
+                // 为真实链接项添加编辑覆盖层（排除添加链接按钮）
                 document.querySelectorAll(`#linksContainer-${sectionId} .link-item`).forEach(item => {
                     // 检查是否是添加链接按钮，如果是则跳过
                     if (!item.querySelector('.add-link-placeholder')) {
                         item.classList.add('edit-mode');
-                        
+                         
                         // 添加编辑覆盖层
                         if (!item.querySelector('.link-edit-overlay')) {
                             const overlay = document.createElement('div');
@@ -306,22 +299,17 @@ const Renderer = {
                         }
                     }
                 });
-                
+                 
                 // 重新绑定编辑和删除事件
-                setTimeout(() => {
-                    if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
-                        Links.bindEditDeleteEvents();
-                    }
-                }, 10);
-            }, 50);
-        }
-        
-        // 应用悬停效果
-        if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
-            setTimeout(() => {
+                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                    Links.bindEditDeleteEvents();
+                }
+            }
+             
+            // 应用悬停效果
+            if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
                 Styles.updateLinkButtonHoverEffect(sectionId);
-            }, 100);
-        }
+            }
     },
     
     // 局部更新特定分组
@@ -363,32 +351,28 @@ const Renderer = {
         
         // 如果在编辑模式下，重新绑定事件
         if (DataAPI.isEditMode()) {
-            setTimeout(() => {
-                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
-                    Links.bindEditDeleteEvents();
-                }
-                // 重新绑定分组标题点击事件
-                const titleElement = sectionElement.querySelector('.section-title');
-                if (titleElement) {
-                    titleElement.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (DataAPI.isEditMode()) {
-                            const sectionsData = DataAPI.getSections();
-                            const sectionData = sectionsData.find(s => s.id === sectionId);
-                            if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
-                                UI.showSectionEditModal(sectionData);
-                            }
+            if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                Links.bindEditDeleteEvents();
+            }
+            // 重新绑定分组标题点击事件
+            const titleElement = sectionElement.querySelector('.section-title');
+            if (titleElement) {
+                titleElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (DataAPI.isEditMode()) {
+                        const sectionsData = DataAPI.getSections();
+                        const sectionData = sectionsData.find(s => s.id === sectionId);
+                        if (sectionData && typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
+                            UI.showSectionEditModal(sectionData);
                         }
-                    });
-                }
-            }, 10);
+                    }
+                });
+            }
         }
-        
+         
         // 应用悬停效果
         if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
-            setTimeout(() => {
-                Styles.updateLinkButtonHoverEffect(sectionId);
-            }, 100);
+            Styles.updateLinkButtonHoverEffect(sectionId);
         }
     },
     
@@ -430,34 +414,30 @@ const Renderer = {
         
         // 如果在编辑模式下，绑定事件
         if (DataAPI.isEditMode()) {
-            setTimeout(() => {
-                if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
-                    Links.bindEditDeleteEvents();
-                }
-                if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
-                    DragDrop.initDragAndDrop();
-                }
-                
-                // 绑定分组标题点击事件
-                const titleElement = sectionElement.querySelector('.section-title');
-                if (titleElement) {
-                    titleElement.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        if (DataAPI.isEditMode()) {
-                            if (typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
-                                UI.showSectionEditModal(section);
-                            }
+            if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+                Links.bindEditDeleteEvents();
+            }
+            if (typeof DragDrop !== 'undefined' && typeof DragDrop.initDragAndDrop === 'function') {
+                DragDrop.initDragAndDrop();
+            }
+             
+            // 绑定分组标题点击事件
+            const titleElement = sectionElement.querySelector('.section-title');
+            if (titleElement) {
+                titleElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (DataAPI.isEditMode()) {
+                        if (typeof UI !== 'undefined' && typeof UI.showSectionEditModal === 'function') {
+                            UI.showSectionEditModal(section);
                         }
-                    });
-                }
-            }, 10);
+                    }
+                });
+            }
         }
-        
+         
         // 应用悬停效果
         if (typeof Styles !== 'undefined' && typeof Styles.updateLinkButtonHoverEffect === 'function') {
-            setTimeout(() => {
-                Styles.updateLinkButtonHoverEffect(section.id);
-            }, 100);
+            Styles.updateLinkButtonHoverEffect(section.id);
         }
     },
     

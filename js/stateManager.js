@@ -1,6 +1,7 @@
 // stateManager.js - 状态管理模块
 class StateManager {
     constructor() {
+        // 初始化状态对象
         this.state = {
             sectionsData: [],
             isEditMode: false,
@@ -9,62 +10,82 @@ class StateManager {
                 backgroundColor: '#333333'
             }
         };
+        
+        // 初始化监听器数组
         this.listeners = [];
     }
     
-    // 获取状态
+    // 获取当前状态
     getState() {
-        return {...this.state};
+        return { ...this.state };
     }
     
     // 更新状态
     updateState(updates) {
-        this.state = {...this.state, ...updates};
+        // 合并新状态
+        this.state = { ...this.state, ...updates };
+        
+        // 通知所有监听器
         this.notifyListeners();
+        
+        // 保存到本地存储
         this.saveToStorage();
     }
     
     // 订阅状态变化
     subscribe(listener) {
-        this.listeners.push(listener);
-    }
-    
-    // 通知监听器
-    notifyListeners() {
-        this.listeners.forEach(listener => listener(this.state));
-    }
-    
-    // 保存到本地存储
-    saveToStorage() {
-        try {
-            localStorage.setItem('sectionsData', JSON.stringify(this.state.sectionsData));
-            localStorage.setItem('pageTitle', this.state.currentPageSettings.title);
-            localStorage.setItem('isEditMode', this.state.isEditMode.toString());
-        } catch (e) {
-            console.error('保存数据到localStorage时出错:', e);
+        // 添加监听器
+        if (typeof listener === 'function') {
+            this.listeners.push(listener);
         }
     }
     
-    // 从存储加载
+    // 取消订阅
+    unsubscribe(listener) {
+        // 过滤掉要移除的监听器
+        this.listeners = this.listeners.filter(l => l !== listener);
+    }
+    
+    // 通知所有监听器
+    notifyListeners() {
+        // 遍历所有监听器并调用
+        this.listeners.forEach(listener => {
+            try {
+                listener(this.getState());
+            } catch (error) {
+                console.error('调用监听器时出错:', error);
+            }
+        });
+    }
+    
+    // 保存状态到本地存储
+    saveToStorage() {
+        try {
+            // 将状态对象转换为JSON字符串并保存
+            localStorage.setItem('state', JSON.stringify(this.state));
+        } catch (error) {
+            console.error('保存状态到本地存储时出错:', error);
+        }
+    }
+    
+    // 从本地存储加载状态
     loadFromStorage() {
         try {
-            const sections = localStorage.getItem('sectionsData');
-            const title = localStorage.getItem('pageTitle');
-            const isEditMode = localStorage.getItem('isEditMode');
+            // 从本地存储获取状态
+            const storedState = localStorage.getItem('state');
             
-            if (sections) {
-                this.state.sectionsData = JSON.parse(sections);
+            // 如果有存储的状态，则解析并应用
+            if (storedState) {
+                const parsedState = JSON.parse(storedState);
+                
+                // 验证解析后的状态格式是否正确
+                if (typeof parsedState === 'object' && parsedState !== null) {
+                    // 合并解析后的状态
+                    this.state = { ...this.state, ...parsedState };
+                }
             }
-            
-            if (title) {
-                this.state.currentPageSettings.title = title;
-            }
-            
-            if (isEditMode) {
-                this.state.isEditMode = isEditMode === 'true';
-            }
-        } catch (e) {
-            console.error('从localStorage加载数据时出错:', e);
+        } catch (error) {
+            console.error('从本地存储加载状态时出错:', error);
         }
     }
 }

@@ -1,6 +1,6 @@
 # ZenPage
 
-这是一个实验性的项目，由不会编程的设计师通过和通意千问AI对话，生成的功能比较完整的个人导航页面，具有以下特性：
+这是一个实验性的项目，由不会编程的设计师通过和Lingma与Trae这两款AI IDE对话，生成的功能比较完整的个人导航页面，具有以下特性：
 
 This is an experimental project created by a designer who doesn't know programming, through conversations with Tongyi Qianwen AI, generating a relatively complete personal navigation page with the following features:
 

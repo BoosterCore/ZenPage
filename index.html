@@ -205,6 +205,66 @@
         </div>
     </div>
     
+    <!-- 导出配置模态框 -->
+    <div class="modal" id="exportConfigModal">
+        <div class="modal-content glass-effect" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>导出配置</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="exportConfigName">配置名称:</label>
+                    <input type="text" id="exportConfigName" class="glass-input" placeholder="请输入配置名称" value="navigation_config">
+                </div>
+                <div class="setting-group">
+                    <label for="exportConfigFormat">文件格式:</label>
+                    <select id="exportConfigFormat" class="glass-input">
+                        <option value="json">JSON (*.json)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <p class="section-edit-preview-note">
+                        导出的配置文件将包含页面标题、样式设置、分组和链接数据。
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelExportBtn" class="glass-button secondary">取消</button>
+                <button id="confirmExportBtn" class="glass-button primary">导出</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入配置模态框 -->
+    <div class="modal" id="importConfigModal">
+        <div class="modal-content glass-effect" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>导入配置</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="importConfigFilePath">选择配置文件:</label>
+                    <div class="setting-group-actions">
+                        <input type="file" id="importConfigFilePath" accept=".json" style="display: none;">
+                        <button id="browseConfigFileBtn" class="glass-button">浏览文件...</button>
+                        <span id="selectedFileName" class="section-edit-preview-note" style="flex: 1; padding-left: 10px;">未选择文件</span>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <p class="section-edit-preview-note" style="color: rgba(255, 165, 0, 0.8);">
+                        <strong>注意:</strong> 导入配置将覆盖当前所有设置，包括页面标题、样式、分组和链接。
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelImportBtn" class="glass-button secondary">取消</button>
+                <button id="confirmImportBtn" class="glass-button primary">导入</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 背景遮罩层 -->
     <div id="modalBackdrop" class="modal-backdrop"></div>
     

@@ -537,11 +537,9 @@ const UI = {
                     if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                         Renderer.renderSections();
                         // 重新渲染后初始化链接拖拽功能
-                        setTimeout(() => {
-                            if (typeof DragDrop !== 'undefined' && typeof DragDrop.initLinkDragDrop === 'function') {
-                                DragDrop.initLinkDragDrop();
-                            }
-                        }, 100);
+                        if (typeof DragDrop !== 'undefined' && typeof DragDrop.initLinkDragDrop === 'function') {
+                            DragDrop.initLinkDragDrop();
+                        }
                     }
                 } else {
                     // 退出编辑模式
@@ -577,143 +575,303 @@ const UI = {
     initImportExportFunctions() {
         // 导出配置功能
         const exportConfigBtn = document.getElementById('exportConfigBtn');
-        if (exportConfigBtn) {
+        const exportConfigModal = document.getElementById('exportConfigModal');
+        const cancelExportBtn = document.getElementById('cancelExportBtn');
+        const confirmExportBtn = document.getElementById('confirmExportBtn');
+        const exportConfigName = document.getElementById('exportConfigName');
+        const exportConfigFormat = document.getElementById('exportConfigFormat');
+        
+        if (exportConfigBtn && exportConfigModal) {
+            // 显示导出配置模态框
             exportConfigBtn.addEventListener('click', () => {
-                // 获取当前的所有配置数据
-                const configData = {
-                    pageTitle: document.getElementById('pageTitle').innerText,
-                    titleFontFamily: document.getElementById('pageTitle').style.fontFamily || 'Arial, sans-serif',
-                    titleFontSize: document.getElementById('pageTitle').style.fontSize || '56px',
-                    titleFontColor: document.getElementById('pageTitle').style.color || '#ffffff',
-                    pageBgColor: document.body.style.backgroundColor || '#333333',
-                    pageBgGradient: document.body.style.background || localStorage.getItem('pageBgGradient'),
-                    gradientAngle: localStorage.getItem('gradientAngle') || '90',
-                    sectionsData: DataAPI.getSections()
-                };
+                exportConfigModal.style.display = 'block';
+                this.showBodyBlur();
+                this.makeModalDraggable(exportConfigModal);
                 
-                // 创建下载链接
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "navigation_config.json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
+                // 确保模态框背景色与当前页面背景匹配
+                this.updateModalBackgroundColor();
             });
+            
+            // 关闭模态框
+            const closeExportModal = () => {
+                exportConfigModal.style.display = 'none';
+                this.hideBodyBlur();
+            };
+            
+            // 取消按钮
+            if (cancelExportBtn) {
+                cancelExportBtn.addEventListener('click', closeExportModal);
+            }
+            
+            // 关闭按钮
+            const closeBtn = exportConfigModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeExportModal);
+            }
+            
+            // 点击模态框外部关闭
+            exportConfigModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeExportModal();
+                }
+            });
+            
+            // 确认导出
+            if (confirmExportBtn && exportConfigName && exportConfigFormat) {
+                confirmExportBtn.addEventListener('click', async () => {
+                    // 获取当前的所有配置数据
+                    const configData = {
+                        pageTitle: document.getElementById('pageTitle').innerText,
+                        titleFontFamily: document.getElementById('pageTitle').style.fontFamily || 'Arial, sans-serif',
+                        titleFontSize: document.getElementById('pageTitle').style.fontSize || '56px',
+                        titleFontColor: document.getElementById('pageTitle').style.color || '#ffffff',
+                        pageBgColor: document.body.style.backgroundColor || '#333333',
+                        pageBgGradient: document.body.style.background || localStorage.getItem('pageBgGradient'),
+                        gradientAngle: localStorage.getItem('gradientAngle') || '90',
+                        sectionsData: DataAPI.getSections()
+                    };
+                    
+                    // 获取文件名
+                    const fileName = exportConfigName.value.trim() || 'navigation_config';
+                    const fileExtension = exportConfigFormat.value;
+                    const fullFileName = `${fileName}.${fileExtension}`;
+                    
+                    // 尝试使用File System Access API提供保存路径选择功能
+                    try {
+                        // 检查浏览器是否支持showSaveFilePicker API
+                        if (window.showSaveFilePicker) {
+                            const options = {
+                                suggestedName: fullFileName,
+                                types: [
+                                    {
+                                        description: 'JSON配置文件',
+                                        accept: {
+                                            'application/json': ['.json'],
+                                        },
+                                    },
+                                ],
+                            };
+                            
+                            const handle = await window.showSaveFilePicker(options);
+                            const writable = await handle.createWritable();
+                            await writable.write(JSON.stringify(configData, null, 2));
+                            await writable.close();
+                        } else {
+                            // 回退到传统的下载链接方式
+                            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
+                            const downloadAnchorNode = document.createElement('a');
+                            downloadAnchorNode.setAttribute("href", dataStr);
+                            downloadAnchorNode.setAttribute("download", fullFileName);
+                            document.body.appendChild(downloadAnchorNode);
+                            downloadAnchorNode.click();
+                            downloadAnchorNode.remove();
+                        }
+                    } catch (error) {
+                        // 如果用户取消了文件保存操作或者发生其他错误，使用传统方式
+                        if (error.name !== 'AbortError') {
+                            console.warn('文件保存API失败，使用传统下载方式:', error);
+                            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(configData, null, 2));
+                            const downloadAnchorNode = document.createElement('a');
+                            downloadAnchorNode.setAttribute("href", dataStr);
+                            downloadAnchorNode.setAttribute("download", fullFileName);
+                            document.body.appendChild(downloadAnchorNode);
+                            downloadAnchorNode.click();
+                            downloadAnchorNode.remove();
+                        }
+                    }
+                    
+                    // 关闭模态框
+                    closeExportModal();
+                });
+            }
         }
 
         // 导入配置功能
         const importConfigBtn = document.getElementById('importConfigBtn');
-        const importConfigInput = document.getElementById('importConfigInput');
-        if (importConfigBtn && importConfigInput) {
+        const importConfigModal = document.getElementById('importConfigModal');
+        const cancelImportBtn = document.getElementById('cancelImportBtn');
+        const confirmImportBtn = document.getElementById('confirmImportBtn');
+        const importConfigFilePath = document.getElementById('importConfigFilePath');
+        const browseConfigFileBtn = document.getElementById('browseConfigFileBtn');
+        const selectedFileName = document.getElementById('selectedFileName');
+        
+        if (importConfigBtn && importConfigModal) {
+            // 显示导入配置模态框
             importConfigBtn.addEventListener('click', () => {
-                importConfigInput.click();
-            });
-
-            importConfigInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
+                importConfigModal.style.display = 'block';
+                this.showBodyBlur();
+                this.makeModalDraggable(importConfigModal);
                 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const configData = JSON.parse(e.target.result);
-                        
-                        // 确认是否要导入配置
-                        if (!confirm('导入配置将覆盖当前所有设置，确定要继续吗？')) {
-                            importConfigInput.value = '';
-                            return;
-                        }
-                        
-                        // 恢复配置数据
-                        const pageTitle = document.getElementById('pageTitle');
-                        const pageTitleInput = document.getElementById('pageTitleInput');
-                        if (configData.pageTitle && pageTitle && pageTitleInput) {
-                            pageTitle.innerText = configData.pageTitle;
-                            pageTitleInput.value = configData.pageTitle;
-                            DataAPI.setPageTitle(configData.pageTitle);
-                        }
-                        
-                        const fontFamily = document.getElementById('fontFamily');
-                        if (configData.titleFontFamily && pageTitle && fontFamily) {
-                            pageTitle.style.fontFamily = configData.titleFontFamily;
-                            fontFamily.value = configData.titleFontFamily;
-                            localStorage.setItem('titleFontFamily', configData.titleFontFamily);
-                        }
-                        
-                        const fontSize = document.getElementById('fontSize');
-                        const fontSizeValue = document.getElementById('fontSizeValue');
-                        if (configData.titleFontSize && pageTitle && fontSize && fontSizeValue) {
-                            pageTitle.style.fontSize = configData.titleFontSize;
-                            const fontSizeNum = configData.titleFontSize.replace('px', '');
-                            fontSize.value = fontSizeNum;
-                            fontSizeValue.textContent = configData.titleFontSize;
-                            localStorage.setItem('titleFontSize', fontSizeNum);
-                        }
-                        
-                        const fontColor = document.getElementById('fontColor');
-                        const fontColorPreview = document.getElementById('fontColorPreview');
-                        const fontColorValue = document.getElementById('fontColorValue');
-                        if (configData.titleFontColor && pageTitle && fontColor && fontColorPreview && fontColorValue) {
-                            pageTitle.style.color = configData.titleFontColor;
-                            const formattedFontColor = typeof Styles !== 'undefined' && typeof Styles.formatColorValue === 'function' 
-                                ? Styles.formatColorValue(configData.titleFontColor) 
-                                : configData.titleFontColor;
-                            fontColor.value = formattedFontColor;
-                            fontColorPreview.style.backgroundColor = formattedFontColor;
-                            fontColorValue.textContent = formattedFontColor;
-                            localStorage.setItem('titleFontColor', configData.titleFontColor);
-                        }
-                        
-                        // 加载渐变角度
-                        const gradientAngle = document.getElementById('gradientAngle');
-                        const gradientAngleValue = document.getElementById('gradientAngleValue');
-                        if (configData.gradientAngle && gradientAngle && gradientAngleValue) {
-                            gradientAngle.value = configData.gradientAngle;
-                            gradientAngleValue.textContent = configData.gradientAngle + '°';
-                            localStorage.setItem('gradientAngle', configData.gradientAngle);
-                        }
-                        
-                        // 应用渐变背景
-                        if (configData.pageBgGradient) {
-                            document.body.style.background = configData.pageBgGradient;
-                            localStorage.setItem('pageBgGradient', configData.pageBgGradient);
-                            localStorage.setItem('pageBgColor', configData.pageBgColor || '#333333');
-                        } else if (configData.pageBgColor) {
-                            // 如果没有渐变背景但有颜色，则生成渐变
-                            const angle = configData.gradientAngle || '90';
-                            const gradient = Utils.generateGradientFromColor(configData.pageBgColor, angle);
-                            document.body.style.background = gradient;
-                            localStorage.setItem('pageBgColor', configData.pageBgColor);
-                            localStorage.setItem('pageBgGradient', gradient);
-                            localStorage.setItem('gradientAngle', angle);
-                        }
-                        
-                        if (configData.sectionsData) {
-                            stateManager.updateState({ sectionsData: configData.sectionsData });
-                            // 保存数据
-                            Data.saveSectionsData();
-                            // 重新渲染
-                            if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
-                                Renderer.renderSections();
-                            }
-                        }
-                        
-                        // 更新模态框背景色
-                        UI.updateModalBackgroundColor();
-                        
-                        // 重置文件输入
-                        importConfigInput.value = '';
-                        
-                        alert('配置导入成功！');
-                    } catch (error) {
-                        ErrorHandler.handle(error, '导入配置');
-                        alert('配置文件格式错误，请选择有效的配置文件。');
-                        importConfigInput.value = '';
-                    }
-                };
-                reader.readAsText(file);
+                // 重置文件输入和显示
+                if (importConfigFilePath) {
+                    importConfigFilePath.value = '';
+                }
+                if (selectedFileName) {
+                    selectedFileName.textContent = '未选择文件';
+                }
+                
+                // 确保模态框背景色与当前页面背景匹配
+                this.updateModalBackgroundColor();
             });
+            
+            // 关闭模态框
+            const closeImportModal = () => {
+                importConfigModal.style.display = 'none';
+                this.hideBodyBlur();
+            };
+            
+            // 取消按钮
+            if (cancelImportBtn) {
+                cancelImportBtn.addEventListener('click', closeImportModal);
+            }
+            
+            // 关闭按钮
+            const closeBtn = importConfigModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeImportModal);
+            }
+            
+            // 点击模态框外部关闭
+            importConfigModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeImportModal();
+                }
+            });
+            
+            // 浏览文件按钮
+            if (browseConfigFileBtn && importConfigFilePath) {
+                browseConfigFileBtn.addEventListener('click', () => {
+                    importConfigFilePath.click();
+                });
+            }
+            
+            // 文件选择变化
+            if (importConfigFilePath && selectedFileName) {
+                importConfigFilePath.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        selectedFileName.textContent = file.name;
+                    } else {
+                        selectedFileName.textContent = '未选择文件';
+                    }
+                });
+            }
+            
+            // 确认导入
+            if (confirmImportBtn && importConfigFilePath) {
+                confirmImportBtn.addEventListener('click', () => {
+                    const file = importConfigFilePath.files[0];
+                    if (!file) {
+                        alert('请先选择配置文件');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const configData = JSON.parse(e.target.result);
+                            
+                            // 确认是否要导入配置
+                            if (!confirm('导入配置将覆盖当前所有设置，确定要继续吗？')) {
+                                importConfigFilePath.value = '';
+                                selectedFileName.textContent = '未选择文件';
+                                return;
+                            }
+                            
+                            // 恢复配置数据
+                            const pageTitle = document.getElementById('pageTitle');
+                            const pageTitleInput = document.getElementById('pageTitleInput');
+                            if (configData.pageTitle && pageTitle && pageTitleInput) {
+                                pageTitle.innerText = configData.pageTitle;
+                                pageTitleInput.value = configData.pageTitle;
+                                DataAPI.setPageTitle(configData.pageTitle);
+                            }
+                            
+                            const fontFamily = document.getElementById('fontFamily');
+                            if (configData.titleFontFamily && pageTitle && fontFamily) {
+                                pageTitle.style.fontFamily = configData.titleFontFamily;
+                                fontFamily.value = configData.titleFontFamily;
+                                localStorage.setItem('titleFontFamily', configData.titleFontFamily);
+                            }
+                            
+                            const fontSize = document.getElementById('fontSize');
+                            const fontSizeValue = document.getElementById('fontSizeValue');
+                            if (configData.titleFontSize && pageTitle && fontSize && fontSizeValue) {
+                                pageTitle.style.fontSize = configData.titleFontSize;
+                                const fontSizeNum = configData.titleFontSize.replace('px', '');
+                                fontSize.value = fontSizeNum;
+                                fontSizeValue.textContent = configData.titleFontSize;
+                                localStorage.setItem('titleFontSize', fontSizeNum);
+                            }
+                            
+                            const fontColor = document.getElementById('fontColor');
+                            const fontColorPreview = document.getElementById('fontColorPreview');
+                            const fontColorValue = document.getElementById('fontColorValue');
+                            if (configData.titleFontColor && pageTitle && fontColor && fontColorPreview && fontColorValue) {
+                                pageTitle.style.color = configData.titleFontColor;
+                                const formattedFontColor = typeof Styles !== 'undefined' && typeof Styles.formatColorValue === 'function' 
+                                    ? Styles.formatColorValue(configData.titleFontColor) 
+                                    : configData.titleFontColor;
+                                fontColor.value = formattedFontColor;
+                                fontColorPreview.style.backgroundColor = formattedFontColor;
+                                fontColorValue.textContent = formattedFontColor;
+                                localStorage.setItem('titleFontColor', configData.titleFontColor);
+                            }
+                            
+                            // 加载渐变角度
+                            const gradientAngle = document.getElementById('gradientAngle');
+                            const gradientAngleValue = document.getElementById('gradientAngleValue');
+                            if (configData.gradientAngle && gradientAngle && gradientAngleValue) {
+                                gradientAngle.value = configData.gradientAngle;
+                                gradientAngleValue.textContent = configData.gradientAngle + '°';
+                                localStorage.setItem('gradientAngle', configData.gradientAngle);
+                            }
+                            
+                            // 应用渐变背景
+                            if (configData.pageBgGradient) {
+                                document.body.style.background = configData.pageBgGradient;
+                                localStorage.setItem('pageBgGradient', configData.pageBgGradient);
+                                localStorage.setItem('pageBgColor', configData.pageBgColor || '#333333');
+                            } else if (configData.pageBgColor) {
+                                // 如果没有渐变背景但有颜色，则生成渐变
+                                const angle = configData.gradientAngle || '90';
+                                const gradient = Utils.generateGradientFromColor(configData.pageBgColor, angle);
+                                document.body.style.background = gradient;
+                                localStorage.setItem('pageBgColor', configData.pageBgColor);
+                                localStorage.setItem('pageBgGradient', gradient);
+                                localStorage.setItem('gradientAngle', angle);
+                            }
+                            
+                            if (configData.sectionsData) {
+                                stateManager.updateState({ sectionsData: configData.sectionsData });
+                                // 保存数据
+                                Data.saveSectionsData();
+                                // 重新渲染
+                                if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                                    Renderer.renderSections();
+                                }
+                            }
+                            
+                            // 更新模态框背景色
+                            UI.updateModalBackgroundColor();
+                            
+                            // 关闭模态框
+                            closeImportModal();
+                            
+                            // 重置文件输入
+                            importConfigFilePath.value = '';
+                            
+                            alert('配置导入成功！');
+                        } catch (error) {
+                            ErrorHandler.handle(error, '导入配置');
+                            alert('配置文件格式错误，请选择有效的配置文件。');
+                            importConfigFilePath.value = '';
+                            selectedFileName.textContent = '未选择文件';
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            }
         }
     },
     
@@ -740,11 +898,9 @@ const UI = {
         });
         
         // 重新绑定事件
-        setTimeout(() => {
-            if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
-                Links.bindEditDeleteEvents();
-            }
-        }, 10);
+        if (typeof Links !== 'undefined' && typeof Links.bindEditDeleteEvents === 'function') {
+            Links.bindEditDeleteEvents();
+        }
     },
     
     // 移除编辑覆盖层
