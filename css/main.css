@@ -449,3 +449,31 @@ body {
     width: 100%;
     text-align: center;
 }
+
+/* 编辑模式下的链接项 - 默认隐藏编辑按钮 */
+.link-item.edit-mode .link-edit-overlay {
+    position: absolute;
+    top: auto;
+    left: auto;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 2;
+    padding: 3px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* 鼠标悬停时显示编辑按钮 */
+.link-item.edit-mode:hover .link-edit-overlay {
+    opacity: 1;
+}
+
+/* 链接按钮悬停时的样式 */
+.link-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+}

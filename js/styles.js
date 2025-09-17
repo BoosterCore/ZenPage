@@ -52,6 +52,68 @@ const Styles = {
         }
     },
     
+    // 重置UI配色（只重置配色，不重置其他样式）
+    resetUIColors() {
+        // 重置页面背景色
+        const defaultGradient = 'linear-gradient(180deg, #1a1a1a 0%, #333333 60%, #4d4d4d 90%, #666666 100%)';
+        document.body.style.background = defaultGradient;
+        
+        // 重置标题颜色
+        const pageTitle = document.getElementById('pageTitle');
+        if (pageTitle) {
+            pageTitle.style.color = '#ffffff';
+        }
+        
+        // 重置分组背景色
+        const sectionsData = DataAPI.getSections();
+        if (sectionsData.length > 0) {
+            sectionsData.forEach((section, index) => {
+                // 默认颜色方案
+                const defaultColors = ['#444444', '#555555', '#666666'];
+                section.backgroundColor = defaultColors[index % defaultColors.length];
+                section.linkButtonColor = Utils.lightenColor(section.backgroundColor, 20);
+            });
+            
+            DataAPI.updateSections(sectionsData);
+            Data.saveSectionsData();
+            
+            // 重新渲染分组
+            if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                Renderer.renderSections();
+            }
+        }
+        
+        // 保存到localStorage
+        localStorage.setItem('pageBgGradient', defaultGradient);
+        localStorage.setItem('pageBgColor', '#333333');
+        localStorage.setItem('titleFontColor', '#ffffff');
+        localStorage.removeItem('gradientAngle'); // 使用默认角度90度
+        
+        // 更新UI控件
+        const fontColor = document.getElementById('fontColor');
+        const fontColorPreview = document.getElementById('fontColorPreview');
+        const fontColorValue = document.getElementById('fontColorValue');
+        const pageBgColor = document.getElementById('pageBgColor');
+        const pageBgColorPreview = document.getElementById('pageBgColorPreview');
+        const pageBgColorValue = document.getElementById('pageBgColorValue');
+        const gradientAngle = document.getElementById('gradientAngle');
+        const gradientAngleValue = document.getElementById('gradientAngleValue');
+        
+        if (fontColor) fontColor.value = '#ffffff';
+        if (fontColorPreview) fontColorPreview.style.backgroundColor = '#ffffff';
+        if (fontColorValue) fontColorValue.textContent = '#ffffff';
+        if (pageBgColor) pageBgColor.value = '#333333';
+        if (pageBgColorPreview) pageBgColorPreview.style.backgroundColor = '#333333';
+        if (pageBgColorValue) pageBgColorValue.textContent = '#333333';
+        if (gradientAngle) gradientAngle.value = '90';
+        if (gradientAngleValue) gradientAngleValue.textContent = '90°';
+        
+        // 更新模态框背景色
+        if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
+            UI.updateModalBackgroundColor();
+        }
+    },
+    
     // 更新分组链接按钮样式
     updateSectionLinkButtonStyle(sectionId, buttonColor) {
         const linksContainer = document.getElementById(`linksContainer-${sectionId}`);

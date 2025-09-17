@@ -398,8 +398,8 @@ const UI = {
         const resetStylesBtn = document.getElementById('resetStyles');
         if (resetStylesBtn) {
             resetStylesBtn.addEventListener('click', function() {
-                if (typeof Styles !== 'undefined' && typeof Styles.resetTitleStyles === 'function') {
-                    Styles.resetTitleStyles();
+                if (typeof Styles !== 'undefined' && typeof Styles.resetUIColors === 'function') {
+                    Styles.resetUIColors();
                 }
                 
                 // 重置页面背景色和渐变角度控件
@@ -408,12 +408,18 @@ const UI = {
                 const pageBgColorValue = document.getElementById('pageBgColorValue');
                 const gradientAngle = document.getElementById('gradientAngle');
                 const gradientAngleValue = document.getElementById('gradientAngleValue');
+                const fontColor = document.getElementById('fontColor');
+                const fontColorPreview = document.getElementById('fontColorPreview');
+                const fontColorValue = document.getElementById('fontColorValue');
                 
                 if (pageBgColor) pageBgColor.value = '#333333';
                 if (pageBgColorPreview) pageBgColorPreview.style.backgroundColor = '#333333';
                 if (pageBgColorValue) pageBgColorValue.textContent = '#333333';
                 if (gradientAngle) gradientAngle.value = '90';
                 if (gradientAngleValue) gradientAngleValue.textContent = '90°';
+                if (fontColor) fontColor.value = '#ffffff';
+                if (fontColorPreview) fontColorPreview.style.backgroundColor = '#ffffff';
+                if (fontColorValue) fontColorValue.textContent = '#ffffff';
                 
                 // 更新模态框背景色
                 if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
