@@ -41,8 +41,9 @@ const UIMagic = {
                     const imageData = ctx.getImageData(0, 0, width, height);
                     const data = imageData.data;
                     
-                    // 颜色统计
+                    // 颜色统计 - 包含面积计数
                     const colorCounts = {};
+                    let totalPixels = 0;
                     
                     // 分析所有像素（每隔10个像素采样以提高性能）
                     for (let i = 0; i < data.length; i += 40) {
@@ -53,6 +54,7 @@ const UIMagic = {
                         
                         // 忽略透明度太低的像素
                         if (a < 128) continue;
+                        totalPixels++;
                         
                         // 检查是否为接近黑白的颜色，如果是则跳过
                         const max = Math.max(r, g, b);
@@ -75,17 +77,22 @@ const UIMagic = {
                     let colors = Object.keys(colorCounts)
                         .map(key => {
                             const [r, g, b] = key.split(',').map(Number);
+                            const count = colorCounts[key];
+                            const percentage = (count / totalPixels) * 100; // 计算占比百分比
                             return {
                                 r, g, b,
-                                count: colorCounts[key],
-                                hex: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+                                count: count,
+                                percentage: percentage,
+                                hex: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`,
+                                brightness: (r * 299 + g * 587 + b * 114) / 1000 // 计算亮度
                             };
                         })
-                        .sort((a, b) => b.count - a.count);
+                        .sort((a, b) => b.count - a.count); // 按面积占比排序
                     
                     // 如果颜色太少，降低饱和度阈值重新采样
                     if (colors.length < 6) {
                         const colorCounts2 = {};
+                        totalPixels = 0;
                         for (let i = 0; i < data.length; i += 20) {
                             const r = data[i];
                             const g = data[i + 1];
@@ -94,6 +101,7 @@ const UIMagic = {
                             
                             // 忽略透明度太低的像素
                             if (a < 128) continue;
+                            totalPixels++;
                             
                             // 降低饱和度要求
                             const max = Math.max(r, g, b);
@@ -114,10 +122,14 @@ const UIMagic = {
                         colors = Object.keys(colorCounts2)
                             .map(key => {
                                 const [r, g, b] = key.split(',').map(Number);
+                                const count = colorCounts2[key];
+                                const percentage = (count / totalPixels) * 100;
                                 return {
                                     r, g, b,
-                                    count: colorCounts2[key],
-                                    hex: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+                                    count: count,
+                                    percentage: percentage,
+                                    hex: `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`,
+                                    brightness: (r * 299 + g * 587 + b * 114) / 1000
                                 };
                             })
                             .sort((a, b) => b.count - a.count);
@@ -129,8 +141,8 @@ const UIMagic = {
                         return;
                     }
                     
-                    // 过滤掉过于接近的颜色，保留最具代表性的颜色
-                    const filteredColors = UIMagic.filterSimilarColors(colors, 10);
+                    // 过滤掉过于接近的颜色，保留最具代表性的颜色，同时保持面积占比信息
+                    const filteredColors = UIMagic.filterSimilarColorsWithPercentages(colors, 10);
                     
                     // 确保有足够的颜色
                     while (filteredColors.length < 6 && colors.length > filteredColors.length) {
@@ -142,17 +154,22 @@ const UIMagic = {
                         }
                     }
                     
-                    resolve(filteredColors.slice(0, 10)); // 最多返回10个颜色
+                    // 按面积占比排序后返回
+                    const sortedColors = filteredColors
+                        .slice(0, 10)
+                        .sort((a, b) => b.count - a.count);
+                    
+                    resolve(sortedColors);
                 } catch (error) {
                     console.error('颜色提取错误:', error);
                     // 返回默认颜色
                     resolve([
-                        { hex: '#444444', r: 68, g: 68, b: 68 },
-                        { hex: '#555555', r: 85, g: 85, b: 85 },
-                        { hex: '#666666', r: 102, g: 102, b: 102 },
-                        { hex: '#777777', r: 119, g: 119, b: 119 },
-                        { hex: '#888888', r: 136, g: 136, b: 136 },
-                        { hex: '#999999', r: 153, g: 153, b: 153 }
+                        { hex: '#444444', r: 68, g: 68, b: 68, count: 100, percentage: 20 },
+                        { hex: '#555555', r: 85, g: 85, b: 85, count: 90, percentage: 18 },
+                        { hex: '#666666', r: 102, g: 102, b: 102, count: 80, percentage: 16 },
+                        { hex: '#777777', r: 119, g: 119, b: 119, count: 70, percentage: 14 },
+                        { hex: '#888888', r: 136, g: 136, b: 136, count: 60, percentage: 12 },
+                        { hex: '#999999', r: 153, g: 153, b: 153, count: 50, percentage: 10 }
                     ]);
                 }
             };
@@ -160,12 +177,12 @@ const UIMagic = {
             img.onerror = function() {
                 // 如果图片加载失败，返回默认颜色
                 resolve([
-                    { hex: '#444444', r: 68, g: 68, b: 68 },
-                    { hex: '#555555', r: 85, g: 85, b: 85 },
-                    { hex: '#666666', r: 102, g: 102, b: 102 },
-                    { hex: '#777777', r: 119, g: 119, b: 119 },
-                    { hex: '#888888', r: 136, g: 136, b: 136 },
-                    { hex: '#999999', r: 153, g: 153, b: 153 }
+                    { hex: '#444444', r: 68, g: 68, b: 68, count: 100, percentage: 20 },
+                    { hex: '#555555', r: 85, g: 85, b: 85, count: 90, percentage: 18 },
+                    { hex: '#666666', r: 102, g: 102, b: 102, count: 80, percentage: 16 },
+                    { hex: '#777777', r: 119, g: 119, b: 119, count: 70, percentage: 14 },
+                    { hex: '#888888', r: 136, g: 136, b: 136, count: 60, percentage: 12 },
+                    { hex: '#999999', r: 153, g: 153, b: 153, count: 50, percentage: 10 }
                 ]);
             };
             
@@ -173,9 +190,12 @@ const UIMagic = {
         });
     },
     
-    // 过滤相似颜色
-    filterSimilarColors(colors, maxColors) {
+    // 过滤相似颜色，同时保持面积占比信息
+    filterSimilarColorsWithPercentages(colors, maxColors) {
         if (colors.length === 0) return [];
+        
+        // 按面积占比排序
+        colors.sort((a, b) => b.count - a.count);
         
         const result = [colors[0]]; // 总是包含最常见的颜色
         
@@ -202,10 +222,11 @@ const UIMagic = {
             }
         }
         
-        return result;
+        // 保持按面积占比排序
+        return result.sort((a, b) => b.count - a.count);
     },
     
-    // 生成配色方案
+    // 生成配色方案 - 按面积占比分配颜色
     generateColorScheme(dominantColors) {
         // 确保至少有6个颜色
         while (dominantColors.length < 6) {
@@ -217,35 +238,32 @@ const UIMagic = {
                 b: Math.min(255, Math.max(0, lastColor.b + (Math.random() > 0.5 ? 30 : -30)))
             };
             newColor.hex = `#${newColor.r.toString(16).padStart(2, '0')}${newColor.g.toString(16).padStart(2, '0')}${newColor.b.toString(16).padStart(2, '0')}`;
+            newColor.count = lastColor.count * 0.8; // 新颜色的面积占比略低
+            newColor.percentage = lastColor.percentage * 0.8;
             dominantColors.push(newColor);
         }
         
-        // 按亮度排序
-        dominantColors.sort((a, b) => {
-            const brightnessA = (a.r * 299 + a.g * 587 + a.b * 114) / 1000;
-            const brightnessB = (b.r * 299 + b.g * 587 + b.b * 114) / 1000;
-            return brightnessA - brightnessB;
-        });
+        // 按面积占比排序（已在此前步骤完成）
         
         return {
-            // 主背景色（最暗的颜色）
+            // 主背景色（面积占比最高的颜色）
             mainBg: dominantColors[0].hex,
-            // 辅助背景色
+            // 辅助背景色（面积占比第二的颜色）
             secondaryBg: dominantColors[1].hex,
-            // 分组背景色
+            // 分组背景色（面积占比第三的颜色）
             sectionBg: dominantColors[2].hex,
-            // 链接按钮背景色
+            // 链接按钮背景色（面积占比第四的颜色）
             linkButtonBg: dominantColors[3].hex,
-            // 强调色1
+            // 强调色1（面积占比第五的颜色）
             accent1: dominantColors[4].hex,
-            // 强调色2
+            // 强调色2（面积占比第六的颜色）
             accent2: dominantColors[5].hex
         };
     },
     
-    // 应用配色方案
+    // 应用配色方案 - 按UI元素面积占比匹配颜色，并加入随机性
     applyColorScheme(colorScheme) {
-        // 更新页面背景渐变
+        // 更新页面背景渐变（使用主背景色）
         const gradient = Utils.generateGradientFromColor(colorScheme.mainBg, '180');
         document.body.style.background = gradient;
         localStorage.setItem('pageBgGradient', gradient);
@@ -254,7 +272,7 @@ const UIMagic = {
         // 更新标题颜色（使用强调色之一）
         const pageTitle = document.getElementById('pageTitle');
         if (pageTitle) {
-            // 随机选择一个强调色作为标题颜色
+            // 优先使用强调色作为标题颜色，但加入随机性
             const accentColors = [colorScheme.accent1, colorScheme.accent2];
             const randomAccent = accentColors[Math.floor(Math.random() * accentColors.length)];
             pageTitle.style.color = randomAccent;
@@ -264,27 +282,37 @@ const UIMagic = {
         // 更新分组背景色（如果存在分组）
         const sectionsData = DataAPI.getSections();
         if (sectionsData.length > 0) {
-            // 创建可用颜色数组并随机打乱
-            const colorOptions = [
-                colorScheme.sectionBg, 
-                colorScheme.linkButtonBg, 
-                colorScheme.accent1,
-                colorScheme.accent2,
-                colorScheme.secondaryBg
-            ];
-            
-            // Fisher-Yates 洗牌算法随机化颜色顺序
-            for (let i = colorOptions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [colorOptions[i], colorOptions[j]] = [colorOptions[j], colorOptions[i]];
-            }
-
+            // 按照UI元素在页面中的面积占比分配颜色，并加入随机性
+            // 页面背景 > 分组背景 > 链接按钮 > 强调色
             sectionsData.forEach((section, index) => {
-                // 循环使用随机化后的颜色
-                const colorIndex = index % colorOptions.length;
-                const backgroundColor = colorOptions[colorIndex];
+                // 循环使用颜色方案中的颜色
+                let backgroundColor, linkButtonColor;
+                
+                // 创建一个基于面积占比排序的颜色数组，但加入轻微的随机性
+                const colorOptions = [
+                    colorScheme.sectionBg,     // 面积占比第三的颜色
+                    colorScheme.secondaryBg,   // 面积占比第二的颜色
+                    colorScheme.accent1,       // 面积占比第五的颜色
+                    colorScheme.accent2        // 面积占比第六的颜色
+                ];
+                
+                // 轻微打乱颜色顺序以增加多样性，但保持优先级框架
+                if (Math.random() > 0.7) { // 30% 概率轻微打乱顺序
+                    // 交换相邻元素
+                    const swapIndex = Math.floor(Math.random() * (colorOptions.length - 1));
+                    [colorOptions[swapIndex], colorOptions[swapIndex + 1]] = 
+                    [colorOptions[swapIndex + 1], colorOptions[swapIndex]];
+                }
+                
+                // 根据分组索引选择颜色，但优先使用排序靠前的颜色
+                const priorityFactor = Math.min(1, 0.7 + Math.random() * 0.3); // 0.7-1.0 之间的随机数
+                const colorIndex = Math.floor(index * priorityFactor) % colorOptions.length;
+                
+                backgroundColor = colorOptions[colorIndex];
+                linkButtonColor = Utils.lightenColor(backgroundColor, 20);
+                
                 section.backgroundColor = backgroundColor;
-                section.linkButtonColor = Utils.lightenColor(backgroundColor, 20);
+                section.linkButtonColor = linkButtonColor;
             });
 
             DataAPI.updateSections(sectionsData);

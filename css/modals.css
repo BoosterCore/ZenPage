@@ -22,6 +22,33 @@
     padding: 20px;
 }
 
+/* 设置容器 - 用于并排显示两个设置区块 */
+.settings-container {
+    display: flex;
+    gap: 20px;
+}
+
+/* 设置区块 */
+.settings-section {
+    flex: 1;
+    margin-bottom: 0;
+    padding: 15px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-section-title {
+    margin: 0 0 15px 0;
+    padding: 0 0 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #fff;
+}
+
 /* 模态框底部 */
 .modal-footer {
     padding: 15px 20px;
@@ -331,24 +358,6 @@
     box-shadow: 0 0 0 2px white, 0 0 5px rgba(255,255,255,0.8);
 }
 
-/* 设置区块 */
-.settings-section {
-    margin-bottom: 25px;
-    padding: 15px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.settings-section-title {
-    margin: 0 0 15px 0;
-    padding: 0 0 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    font-size: 1.1em;
-    font-weight: 500;
-    color: #fff;
-}
-
 /* 设置操作按钮组 */
 .setting-group-actions {
     display: flex;
@@ -382,7 +391,7 @@
     background-color: rgba(100, 100, 100, 0.5);
     border-radius: 12px;
     width: 90%;
-    max-width: 500px;
+    max-width: 800px; /* 增加最大宽度以适应双列布局 */
     color: white;
     position: absolute;
     overflow: hidden;

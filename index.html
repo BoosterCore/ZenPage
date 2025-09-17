@@ -39,101 +39,103 @@
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- 标题设置区块 -->
-                <div class="settings-section">
-                    <h4 class="settings-section-title">标题设置</h4>
-                    
-                    <div class="setting-group">
-                        <label for="pageTitleInput">页面标题:</label>
-                        <input type="text" id="pageTitleInput" class="glass-input" placeholder="请输入页面标题">
-                    </div>
-                    
-                    <div class="setting-group">
-                        <div class="setting-row">
-                            <div class="setting-col">
-                                <label for="fontFamily">标题字体:</label>
-                                <select id="fontFamily" class="glass-input">
-                                    <option value="Arial, sans-serif">Arial</option>
-                                    <option value="'Times New Roman', serif">Times New Roman</option>
-                                    <option value="'Courier New', monospace">Courier New</option>
-                                    <option value="Verdana, sans-serif">Verdana</option>
-                                    <option value="Georgia, serif">Georgia</option>
-                                    <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
-                                </select>
-                            </div>
-                            
-                            <div class="setting-col">
-                                <label for="fontStyle">字体样式:</label>
-                                <select id="fontStyle" class="glass-input">
-                                    <option value="normal">正常</option>
-                                    <option value="bold">粗体</option>
-                                    <option value="italic">斜体</option>
-                                    <option value="bold italic">粗体+斜体</option>
-                                </select>
-                            </div>
+                <div class="settings-container">
+                    <!-- 标题设置区块 -->
+                    <div class="settings-section">
+                        <h4 class="settings-section-title">标题设置</h4>
+                        
+                        <div class="setting-group">
+                            <label for="pageTitleInput">页面标题:</label>
+                            <input type="text" id="pageTitleInput" class="glass-input" placeholder="请输入页面标题">
                         </div>
                         
-                        <div class="setting-row">
-                            <div class="setting-col">
-                                <label for="fontSize">标题字号:</label>
-                                <div class="slider-container">
-                                    <input type="range" id="fontSize" min="20" max="100" value="56" class="glass-slider">
-                                    <span id="fontSizeValue">56px</span>
+                        <div class="setting-group">
+                            <div class="setting-row">
+                                <div class="setting-col">
+                                    <label for="fontFamily">标题字体:</label>
+                                    <select id="fontFamily" class="glass-input">
+                                        <option value="Arial, sans-serif">Arial</option>
+                                        <option value="'Times New Roman', serif">Times New Roman</option>
+                                        <option value="'Courier New', monospace">Courier New</option>
+                                        <option value="Verdana, sans-serif">Verdana</option>
+                                        <option value="Georgia, serif">Georgia</option>
+                                        <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-col">
+                                    <label for="fontStyle">字体样式:</label>
+                                    <select id="fontStyle" class="glass-input">
+                                        <option value="normal">正常</option>
+                                        <option value="bold">粗体</option>
+                                        <option value="italic">斜体</option>
+                                        <option value="bold italic">粗体+斜体</option>
+                                    </select>
                                 </div>
                             </div>
                             
-                            <div class="setting-col">
-                                <label for="fontColor">标题颜色:</label>
-                                <div class="color-picker-container">
-                                    <input type="color" id="fontColor" value="#ffffff" class="glass-color-picker">
-                                    <div id="fontColorPreview" class="color-preview" style="background-color: #ffffff;"></div>
-                                    <span id="fontColorValue">#ffffff</span>
+                            <div class="setting-row">
+                                <div class="setting-col">
+                                    <label for="fontSize">标题字号:</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="fontSize" min="20" max="100" value="56" class="glass-slider">
+                                        <span id="fontSizeValue">56px</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-col">
+                                    <label for="fontColor">标题颜色:</label>
+                                    <div class="color-picker-container">
+                                        <input type="color" id="fontColor" value="#ffffff" class="glass-color-picker">
+                                        <div id="fontColorPreview" class="color-preview" style="background-color: #ffffff;"></div>
+                                        <span id="fontColorValue">#ffffff</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- 页面色彩区块 -->
-                <div class="settings-section">
-                    <h4 class="settings-section-title">页面色彩</h4>
                     
-                    <div class="setting-group">
-                        <div class="setting-row">
-                            <div class="setting-col">
-                                <label for="pageBgColor">页面底色:</label>
-                                <div class="color-picker-container">
-                                    <input type="color" id="pageBgColor" value="#333333" class="glass-color-picker">
-                                    <div id="pageBgColorPreview" class="color-preview" style="background-color: #333333;"></div>
-                                    <span id="pageBgColorValue">#333333</span>
+                    <!-- 页面色彩区块 -->
+                    <div class="settings-section">
+                        <h4 class="settings-section-title">页面色彩</h4>
+                        
+                        <div class="setting-group">
+                            <div class="setting-row">
+                                <div class="setting-col">
+                                    <label for="pageBgColor">页面底色:</label>
+                                    <div class="color-picker-container">
+                                        <input type="color" id="pageBgColor" value="#333333" class="glass-color-picker">
+                                        <div id="pageBgColorPreview" class="color-preview" style="background-color: #333333;"></div>
+                                        <span id="pageBgColorValue">#333333</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="setting-col">
-                                <label for="gradientAngle">渐变角度:</label>
-                                <div class="slider-container">
-                                    <input type="range" id="gradientAngle" min="0" max="360" value="90" class="glass-slider">
-                                    <span id="gradientAngleValue">90°</span>
+                                
+                                <div class="setting-col">
+                                    <label for="gradientAngle">渐变角度:</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="gradientAngle" min="0" max="360" value="90" class="glass-slider">
+                                        <span id="gradientAngleValue">90°</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="setting-group">
-                        <label for="imageUpload">UI幻化 (上传图片自动生成配色):</label>
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="imageUpload" accept="image/*" class="glass-file-input">
-                            <button type="button" id="imageUploadButton" class="glass-button secondary">选择图片</button>
-                        </div>
-                        <div class="ui-magic-preview" id="colorPalettePreview" style="display: none; margin-top: 10px;">
-                            <div class="color-palette-container">
-                                <div class="palette-title">提取的颜色：</div>
-                                <div id="colorPalette" class="color-palette"></div>
+                        <div class="setting-group">
+                            <label for="imageUpload">UI幻化 (上传图片自动生成配色):</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" id="imageUpload" accept="image/*" class="glass-file-input">
+                                <button type="button" id="imageUploadButton" class="glass-button secondary">选择图片</button>
                             </div>
-                        </div>
-                        <div class="setting-group-actions">
-                            <button id="applyColorScheme" class="glass-button primary" style="display: none;">应用配色方案</button>
-                            <button id="resetStyles" class="glass-button secondary">重置UI配色</button>
+                            <div class="ui-magic-preview" id="colorPalettePreview" style="display: none; margin-top: 10px;">
+                                <div class="color-palette-container">
+                                    <div class="palette-title">提取的颜色：</div>
+                                    <div id="colorPalette" class="color-palette"></div>
+                                </div>
+                            </div>
+                            <div class="setting-group-actions">
+                                <button id="applyColorScheme" class="glass-button primary" style="display: none;">应用配色方案</button>
+                                <button id="resetStyles" class="glass-button secondary">重置UI配色</button>
+                            </div>
                         </div>
                     </div>
                 </div>
