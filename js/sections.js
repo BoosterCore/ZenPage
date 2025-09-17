@@ -140,7 +140,12 @@ const Sections = {
     deleteSection(sectionId) {
         const sectionsData = DataAPI.getSections();
         if (sectionsData.length <= 1) {
-            alert('至少需要保留一个分组！');
+            // 使用UI.showMessage显示错误信息，而不是alert
+            if (typeof UI !== 'undefined' && typeof UI.showMessage === 'function') {
+                UI.showMessage('至少需要保留一个分组！', 'error');
+            } else {
+                alert('至少需要保留一个分组！');
+            }
             return;
         }
         
@@ -148,15 +153,40 @@ const Sections = {
         if (typeof UI !== 'undefined' && typeof UI.showConfirmModal === 'function') {
             UI.showConfirmModal('确定要删除这个分组吗？分组内的所有链接都将丢失！', function() {
                 // 用户点击确定
-                DataAPI.deleteSection(sectionId);
-                Data.saveSectionsData();
-                if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
-                    Renderer.renderSections();
+                try {
+                    DataAPI.deleteSection(sectionId);
+                    Data.saveSectionsData();
+                    if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                        Renderer.renderSections();
+                    }
+                    // 显示成功消息
+                    if (typeof UI !== 'undefined' && typeof UI.showMessage === 'function') {
+                        UI.showMessage('分组已成功删除', 'success');
+                    }
+                } catch (error) {
+                    // 使用错误处理器处理删除失败的情况
+                    if (typeof ErrorHandler !== 'undefined' && typeof ErrorHandler.handle === 'function') {
+                        ErrorHandler.handle(error, '删除分组');
+                    }
                 }
             }, function() {
                 // 用户点击取消，不做任何操作
                 return;
             });
+        } else {
+            // 降级处理：如果没有自定义确认对话框，使用默认的confirm
+            if (confirm('确定要删除这个分组吗？分组内的所有链接都将丢失！')) {
+                try {
+                    DataAPI.deleteSection(sectionId);
+                    Data.saveSectionsData();
+                    if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
+                        Renderer.renderSections();
+                    }
+                } catch (error) {
+                    console.error('删除分组时出错:', error);
+                    alert('删除分组失败，请重试');
+                }
+            }
         }
     },
     

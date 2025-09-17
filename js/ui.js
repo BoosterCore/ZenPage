@@ -114,6 +114,37 @@ const UI = {
         if (fontColorValue) fontColorValue.textContent = fontColor;
     },
     
+    // 初始化设置面板的字体样式
+    initFontStyle() {
+        const savedFontStyle = localStorage.getItem('titleFontStyle') || 'normal';
+        const fontStyleSelect = document.getElementById('fontStyle');
+        const pageTitle = document.getElementById('pageTitle');
+        
+        if (fontStyleSelect) {
+            fontStyleSelect.value = savedFontStyle;
+        }
+        
+        if (pageTitle) {
+            switch(savedFontStyle) {
+                case 'bold':
+                    pageTitle.style.fontWeight = 'bold';
+                    pageTitle.style.fontStyle = 'normal';
+                    break;
+                case 'italic':
+                    pageTitle.style.fontWeight = 'normal';
+                    pageTitle.style.fontStyle = 'italic';
+                    break;
+                case 'bold italic':
+                    pageTitle.style.fontWeight = 'bold';
+                    pageTitle.style.fontStyle = 'italic';
+                    break;
+                default: // normal
+                    pageTitle.style.fontWeight = 'normal';
+                    pageTitle.style.fontStyle = 'normal';
+            }
+        }
+    },
+    
     // 显示消息
     showMessage(message, type = 'info') {
         // 创建消息元素
@@ -145,6 +176,9 @@ const UI = {
     
     // 初始化设置面板事件
     initSettingsPanel() {
+        // 初始化字体样式
+        this.initFontStyle();
+        
         // 页面标题设置
         const pageTitleInput = document.getElementById('pageTitleInput');
         if (pageTitleInput) {
@@ -180,6 +214,35 @@ const UI = {
                 if (pageTitle) {
                     pageTitle.style.fontFamily = this.value;
                     localStorage.setItem('titleFontFamily', this.value);
+                }
+            });
+        }
+        
+        // 字体样式设置
+        const fontStyle = document.getElementById('fontStyle');
+        if (fontStyle) {
+            fontStyle.addEventListener('change', function() {
+                const pageTitle = document.getElementById('pageTitle');
+                if (pageTitle) {
+                    // 根据选择的值设置字体样式
+                    switch(this.value) {
+                        case 'bold':
+                            pageTitle.style.fontWeight = 'bold';
+                            pageTitle.style.fontStyle = 'normal';
+                            break;
+                        case 'italic':
+                            pageTitle.style.fontWeight = 'normal';
+                            pageTitle.style.fontStyle = 'italic';
+                            break;
+                        case 'bold italic':
+                            pageTitle.style.fontWeight = 'bold';
+                            pageTitle.style.fontStyle = 'italic';
+                            break;
+                        default: // normal
+                            pageTitle.style.fontWeight = 'normal';
+                            pageTitle.style.fontStyle = 'normal';
+                    }
+                    localStorage.setItem('titleFontStyle', this.value);
                 }
             });
         }
@@ -473,6 +536,12 @@ const UI = {
                     // 重新渲染分组以显示编辑UI
                     if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                         Renderer.renderSections();
+                        // 重新渲染后初始化链接拖拽功能
+                        setTimeout(() => {
+                            if (typeof DragDrop !== 'undefined' && typeof DragDrop.initLinkDragDrop === 'function') {
+                                DragDrop.initLinkDragDrop();
+                            }
+                        }, 100);
                     }
                 } else {
                     // 退出编辑模式
@@ -493,6 +562,11 @@ const UI = {
                     // 重新渲染分组以隐藏编辑UI
                     if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                         Renderer.renderSections();
+                    }
+                    
+                    // 清理链接拖拽功能
+                    if (typeof DragDrop !== 'undefined' && typeof DragDrop.cleanupDragAndDrop === 'function') {
+                        DragDrop.cleanupDragAndDrop();
                     }
                 }
             });

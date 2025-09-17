@@ -250,39 +250,57 @@ const UIMagic = {
         document.body.style.background = gradient;
         localStorage.setItem('pageBgGradient', gradient);
         localStorage.setItem('pageBgColor', colorScheme.mainBg);
-        
-        // 更新标题颜色
+
+        // 更新标题颜色（使用强调色之一）
         const pageTitle = document.getElementById('pageTitle');
         if (pageTitle) {
-            pageTitle.style.color = colorScheme.accent2;
-            localStorage.setItem('titleFontColor', colorScheme.accent2);
+            // 随机选择一个强调色作为标题颜色
+            const accentColors = [colorScheme.accent1, colorScheme.accent2];
+            const randomAccent = accentColors[Math.floor(Math.random() * accentColors.length)];
+            pageTitle.style.color = randomAccent;
+            localStorage.setItem('titleFontColor', randomAccent);
         }
-        
+
         // 更新分组背景色（如果存在分组）
         const sectionsData = DataAPI.getSections();
         if (sectionsData.length > 0) {
-            sectionsData.forEach((section, index) => {
-                // 循环使用颜色方案中的颜色
-                const colorIndex = index % 3; // 使用前3个颜色
-                const colors = [colorScheme.sectionBg, colorScheme.accent1, colorScheme.linkButtonBg];
-                section.backgroundColor = colors[colorIndex];
-                section.linkButtonColor = Utils.lightenColor(colors[colorIndex], 20);
-            });
+            // 创建可用颜色数组并随机打乱
+            const colorOptions = [
+                colorScheme.sectionBg, 
+                colorScheme.linkButtonBg, 
+                colorScheme.accent1,
+                colorScheme.accent2,
+                colorScheme.secondaryBg
+            ];
             
+            // Fisher-Yates 洗牌算法随机化颜色顺序
+            for (let i = colorOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [colorOptions[i], colorOptions[j]] = [colorOptions[j], colorOptions[i]];
+            }
+
+            sectionsData.forEach((section, index) => {
+                // 循环使用随机化后的颜色
+                const colorIndex = index % colorOptions.length;
+                const backgroundColor = colorOptions[colorIndex];
+                section.backgroundColor = backgroundColor;
+                section.linkButtonColor = Utils.lightenColor(backgroundColor, 20);
+            });
+
             DataAPI.updateSections(sectionsData);
             Data.saveSectionsData();
-            
+
             // 重新渲染分组
             if (typeof Renderer !== 'undefined' && typeof Renderer.renderSections === 'function') {
                 Renderer.renderSections();
             }
         }
-        
+
         // 更新模态框背景色
         if (typeof UI !== 'undefined' && typeof UI.updateModalBackgroundColor === 'function') {
             UI.updateModalBackgroundColor();
         }
-        
+
         // 同步更新页面设置面板中的颜色选择器
         if (typeof UI !== 'undefined' && typeof UI.syncColorPickers === 'function') {
             UI.syncColorPickers(colorScheme.mainBg, colorScheme.accent2);
