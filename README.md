@@ -4,6 +4,9 @@
 
 This is an experimental project created by a designer who doesn't know programming, through conversations with Tongyi Qianwen AI, generating a relatively complete personal navigation page with the following features:
 
+## 项目演示 (Project Demo)：
+   https://boostercore.github.io/ZenPage
+
 ## 功能特点 (Features)
 
 - **分组管理**：可以创建、编辑、删除链接分组  
